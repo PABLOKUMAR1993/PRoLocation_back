@@ -9,11 +9,11 @@ require("dotenv").config();
 // Rest
 
 /**
- * Método que devuelve
+ * Method that returns data with coordinates of all devices at the current moment.
  */
 router.get("/all", (req, res) => {
 
-    axios.get(process.env.API_URL)
+    axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
         .then(response => {
             console.log(response.data.posts);
             res.send(response.data.posts);

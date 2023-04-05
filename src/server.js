@@ -4,17 +4,18 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 const MongoClient = require("mongodb").MongoClient;
+const cors = require("cors");
+
+
+// Middleware
+
+app.use(cors());
 
 
 // BBDD
 
 MongoClient.connect(process.env.DB_URL, (err, client) => {
-    if (err != null) {
-        console.log(`Error al conectar a la bbdd: ${err}`)
-    } else {
-        app.locals.db = client.db(process.env.DB_NAME);
-        console.log("Conectado con éxito a la BBDD");
-    }
+    err != null ? console.log(`Error al conectar a la bbdd: ${err}`) : app.locals.db = client.db(process.env.DB_NAME);
 });
 
 
