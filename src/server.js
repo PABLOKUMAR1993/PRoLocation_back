@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // BBDD
 
-MongoClient.connect(process.env.DB_URL, (err, client) => {
+MongoClient.connect(process.env.DB_URL,(err, client) => {
     err != null ? console.log(`Error al conectar a la bbdd: ${err}`) : app.locals.db = client.db(process.env.DB_NAME);
 });
 
