@@ -6,12 +6,26 @@ require("dotenv").config();
 const MongoClient = require("mongodb").MongoClient;
 const cors = require("cors");
 
+////// multer
+
+const multer = require("multer");
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/"); // Dónde se guardará
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + " - " + file.originalname); // Fecha actual + nombre original (evita duplicidad).
+    }
+});
+const upload = multer({ storage: storage });
+
 
 // Middleware
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(upload.any());
 
 
 // BBDD
@@ -25,6 +39,9 @@ MongoClient.connect(process.env.DB_URL,(err, client) => {
 
 const devices = require("./routes/devices");
 app.use("/api/devices", devices);
+
+const contact = require("./routes/contact");
+app.use("/api/contact", contact);
 
 
 // Server

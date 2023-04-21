@@ -1,4 +1,4 @@
-// Import
+// Importaciones
 
 const express = require("express");
 const router = express.Router();
@@ -9,7 +9,7 @@ require("dotenv").config();
 // Rest
 
 /**
- * Method that returns data with coordinates of all devices at the current moment.
+ * Método que devuelve la ubicación actual de los dos dispositivos.
  */
 router.get("/all", (req, res) => {
 
