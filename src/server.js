@@ -27,13 +27,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(upload.any());
 
+//console.log(process.env.DB_URL);
 
 // BBDD
 
-MongoClient.connect(process.env.DB_URL,(err, client) => {
+MongoClient.connect(process.env.DB_URL,{ useUnifiedTopology: true }, (err, client) => {
     err != null ? console.log(`Error al conectar a la bbdd: ${err}`) : app.locals.db = client.db(process.env.DB_NAME);
 });
-
 
 // Routes
 
@@ -41,7 +41,10 @@ const devices = require("./routes/devices");
 app.use("/api/devices", devices);
 
 const contact = require("./routes/contact");
-app.use("/api/contact", contact);
+app.use("/api", contact);
+
+const register = require("./routes/register");
+app.use("/api/register", register);
 
 
 // Server
