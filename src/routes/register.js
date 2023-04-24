@@ -6,14 +6,14 @@ const bcryptFunction = require("../middleware/bcryp")
 
 
 //Registro
-router.post("/registro", bcryptFunction, (req, res) => {
+router.post("/register", bcryptFunction, (req, res) => {
     const db = req.app.locals.db;
     const usuario = req.body;
-    db.collection("usuarios")
+    db.collection("users")
         .find({ email: usuario.email })
         .toArray(function (err, usuarios) {
             if (usuarios.length === 0) {
-                db.collection("usuarios").insertOne(usuario, function (err, respuesta) {
+                db.collection("users").insertOne(usuario, function (err, respuesta) {
                     if (err != null) {
                         console.log("Ha habido un error: ");
                         console.log(err);

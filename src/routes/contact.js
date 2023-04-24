@@ -4,7 +4,6 @@ const router = express.Router();
 const nodemailer = require('nodemailer');
 require ('dotenv').config();
 
-
 // Rest
 
 /**
@@ -65,10 +64,8 @@ router.post('/contact', async (req, res) => {
 
     console.log("Mensaje enviado", info.messageId);
     res.send({ mensaje: "Mensaje recibido" });
-
     
 });
-
 
 // Export
 
