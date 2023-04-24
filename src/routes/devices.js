@@ -2,6 +2,7 @@
 
 const express = require("express");
 const router = express.Router();
+const passport = require("passport");
 const axios = require("axios");
 require("dotenv").config();
 
@@ -11,7 +12,7 @@ require("dotenv").config();
 /**
  * Método que devuelve la ubicación actual de los dos dispositivos.
  */
-router.get("/lastPositionOfAllDevices", (req, res) => {
+router.get("/lastPositionOfAllDevices", passport.authenticate('jwt', { session: false }), (req, res) => {
 
     axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
         .then(response => {
@@ -49,7 +50,7 @@ router.get("/saveDataAllDevice", (req, res) => {
             .then(response => {
             let dispositivos = response.data;
             console.log(response.data.posts);
-            db.collection("dispositivos").insertOne(dispositivos, function (err, respuesta) {
+            db.collection("devices").insertOne(dispositivos, function (err, respuesta) {
                 if (err != null) {
                     console.log("Ha habido un error: ");
                     console.log(err);
@@ -70,7 +71,7 @@ router.get("/saveDataByDayIdLastFiveHundredRaul", (req, res) => {
     .then(response => {
     let dispositivos = response.data;
     console.log(response.data.posts);
-    db.collection("dispositivos").insertOne(dispositivos, function (err, respuesta) {
+    db.collection("devices").insertOne(dispositivos, function (err, respuesta) {
         if (err != null) {
             console.log("Ha habido un error: ");
             console.log(err);
@@ -91,7 +92,7 @@ router.get("/saveDataByDayIdLastFiveHundredPavlo", (req, res) => {
     .then(response => {
     let dispositivos = response.data;
     console.log(response.data.posts);
-    db.collection("dispositivos").insertOne(dispositivos, function (err, respuesta) {
+    db.collection("devices").insertOne(dispositivos, function (err, respuesta) {
         if (err != null) {
             console.log("Ha habido un error: ");
             console.log(err);
