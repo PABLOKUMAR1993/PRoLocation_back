@@ -1,4 +1,4 @@
-//const mongooseUser = require("../models/user");
+const mongooseUser = require("../models/user");
 const jwt = require('jsonwebtoken');
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt'); 
 
@@ -73,7 +73,7 @@ const jwtStrategy = new JwtStrategy(jwtOptions, (payload, done) => {
 //Función que decodifica el token, y devuelve un objeto que incluye el contenido del token en formato JSON. 
 
   function decodeToken(token) {
-    return jwt.verify(token, 'mysecretkey');
+    return jwt.verify(token, mongooseUser);
   }
   
   //Se exportan las funciones y variables

@@ -3,10 +3,10 @@ const bcrypt = require("bcrypt");
 const config = require("./config");
 
 const generateToken = (user) => {
-  return jwt.sign(
+   return jwt.sign(
     {
-      id: user.id,
       email: user.email,
+      password: user.password,
     },
     config.secret,
     { expiresIn: config.expiresIn }
