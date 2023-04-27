@@ -12,11 +12,7 @@ const bcrypt = require("bcrypt");
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const secret = 'mysecretkey';
-
-const options = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: secret
-};
+const jwt = require('jsonwebtoken');
 
 ////// multer
 
@@ -31,8 +27,22 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-//////
-const jwt = require('jsonwebtoken');
+////// JWT
+
+
+/*
+La propiedad jwtFromRequest utiliza la función fromAuthHeaderAsBearerToken() de la biblioteca jsonwebtoken 
+para extraer el token JWT del encabezado Authorization en una solicitud HTTP. 
+Esta es una de las formas más comunes de enviar tokens JWT en solicitudes HTTP.
+La propiedad secretOrKey especifica la clave secreta utilizada para firmar y verificar los tokens JWT en la aplicación. 
+La variable secret debe contener la clave secreta que se utilizará.
+*/
+const options = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: secret
+  };
+
+
 function createToken(user) {
   const payload = {
     sub: user.id,
@@ -60,32 +70,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use(upload.any());
 app.use(
     session({
-        secret: "secret",
-        resave: false,
-        //saveUnitialialized: false
-        saveUnitialialized: true,
-        cookie: {maxAge: 60000}
+        secret: "secret", // Es una cadena utilizada para firmar la cookie de sesión, lo que aumenta la seguridad.
+        resave: false, //Indica si se debe volver a guardar la sesión en el almacenamiento de sesión incluso si la sesión no se ha modificado durante la solicitud.
+        saveUnitialialized: false, //indica si se debe volver a guardar la sesión en el almacenamiento de sesión incluso si la sesión no se ha modificado durante la solicitud.
+        cookie: {maxAge: 60000} // Configura la duración de la cookie de sesión se establece en 60000 milisegundos, que son 60 segundos (1 minuto).
     })
 );
 app.use(passport.initialize()); // Nos permite inicializar el cliente local de Passpot para indicar a Passport como identificar a los usuarios
 app.use(passport.session());//Nos permite manejar las sesiones.
 
-/*passport.use(new JwtStrategy(options, function(jwt_payload, done) {
+passport.use(new JwtStrategy(options, function(jwt_payload, done) {
     // Aquí se puede validar el JWT y buscar al usuario en la base de datos
-    if (jwt_payload.sub === '1234567890') {
+      if (jwt_payload.sub === '1234567890') {
+      console.log(jwt_payload.sub);
       return done(null, { id: '1234567890' });
     } else {
       return done(null, false);
     }
-  }));*/
+  }));
 
-// BBDD
-
-MongoClient.connect(process.env.DB_URL,{ useUnifiedTopology: true }, (err, client) => {
-    err != null ? console.log(`Error al conectar a la bbdd: ${err}`) : app.locals.db = client.db(process.env.DB_NAME);
-});
-
-// Comprobamos si el usuario existe y la contraseña es correcta.
+  // Comprobamos si el usuario existe y la contraseña es correcta.
 
 passport.use(
     new LocalStrategy(
@@ -120,6 +124,16 @@ passport.deserializeUser((id, done) => {
         });
 });
 
+
+
+// BBDD
+
+MongoClient.connect(process.env.DB_URL,{ useUnifiedTopology: true }, (err, client) => {
+    err != null ? console.log(`Error al conectar a la bbdd: ${err}`) : app.locals.db = client.db(process.env.DB_NAME);
+});
+
+
+
 //const jwt = require('jsonwebtoken');
 //const payload = { sub: '1234567890' };
 //const token = jwt.sign(payload, secret);
@@ -127,7 +141,7 @@ passport.deserializeUser((id, done) => {
 
 // REST de loggin
 
-app.post('/login', (req, res, next) => {
+/*app.post('/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
       if (err) {
         return next(err);
@@ -136,19 +150,21 @@ app.post('/login', (req, res, next) => {
         return res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos' });
       }
       // Si el usuario es autenticado correctamente, podrías crear un token JWT y enviarlo como respuesta al cliente.
-      const token = createToken(user); // Aquí se asume que `createToken` es una función que crea un token JWT con la información del usuario.
+      const token = createToken(user); // Crea un token JWT con la información del usuario.
       return res.json({ token });
     })(req, res, next);
-  });
+  });*/
 
-/*app.post("/api/login", passport.authenticate("local", {
+app.post("/api/login", passport.authenticate("local", {
     successRedirect: "/api",
     failureRedirect: "/api/fail"
 }),function(req, res) {
-    const payload = { sub: '1234567890' };
+    const payload = { sub: req.body.id };
     const token = jwt.sign(payload, secret);
+    console.log(payload);
+    console.log(secret);
     res.json({ token: token });
-});*/
+});
 
 app.get("/api", (req, res) => {
     if (req.isAuthenticated() === false) {
@@ -156,7 +172,10 @@ app.get("/api", (req, res) => {
     } else {
         console.log(req.session);
         //return res.send(req.session);
-        return res.send({ mensaje: "Logueado correctamente" });
+        console.log("Token generado a través de /api: ");
+        console.log(token);
+        return res.send({ mensaje: "Logueado correctamente", token });
+        
     }
 });
 
