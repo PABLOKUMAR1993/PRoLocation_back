@@ -14,6 +14,13 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const secret = 'mysecretkey';
 const jwt = require('jsonwebtoken');
 
+
+// BBDD
+
+MongoClient.connect(process.env.DB_URL,{ useUnifiedTopology: true }, (err, client) => {
+    err != null ? console.log(`Error al conectar a la bbdd: ${err}`) : app.locals.db = client.db(process.env.DB_NAME);
+});
+
 ////// multer
 
 const multer = require("multer");
@@ -126,11 +133,7 @@ passport.deserializeUser((id, done) => {
 
 
 
-// BBDD
 
-MongoClient.connect(process.env.DB_URL,{ useUnifiedTopology: true }, (err, client) => {
-    err != null ? console.log(`Error al conectar a la bbdd: ${err}`) : app.locals.db = client.db(process.env.DB_NAME);
-});
 
 
 
