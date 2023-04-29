@@ -14,7 +14,8 @@ require("dotenv").config();
  */
 router.get("/lastPositionOfAllDevices", passport.authenticate('jwt', { session: false }), (req, res) => {
 
-    axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
+    axios.get(`${process.env.API_URL}?user=${process.env.API_USER}
+    &password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
         .then(response => {
             console.log(response.data.posts);
             res.send(response.data.posts);
@@ -25,7 +26,8 @@ router.get("/lastPositionOfAllDevices", passport.authenticate('jwt', { session: 
 
 // Devuelve los datos con las coordenadas del dispositivo de Raúl desde una fecha de 500 en 500.
 router.get("/dataByDayIdLastFiveHundredRaul", (req, res) => {
-    axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&dIni=2023-03-31%2000:10&id=${process.env.API_ID_RAUL}&metode=${process.env.API_METODE_DATE}`)
+    axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}
+    &dIni=2023-03-31%2000:10&id=${process.env.API_ID_RAUL}&metode=${process.env.API_METODE_DATE}`)
         .then(response => {
             console.log(response.data.posts);
             res.send(response.data.posts);
@@ -35,7 +37,8 @@ router.get("/dataByDayIdLastFiveHundredRaul", (req, res) => {
 
 // Devuelve los datos con las coordenadas del dispositivo de Pavlo desde una fecha de 500 en 500.
 router.get("/dataByDayIdLastFiveHundredPavlo", (req, res) => {
-    axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&dIni=2023-03-31%2000:10&id=${process.env.API_ID_RAUL}&metode=${process.env.API_METODE_DATE}`)
+    axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}
+    &dIni=2023-03-31%2000:10&id=${process.env.API_ID_RAUL}&metode=${process.env.API_METODE_DATE}`)
         .then(response => {
             console.log(response.data.posts);
             res.send(response.data.posts);
