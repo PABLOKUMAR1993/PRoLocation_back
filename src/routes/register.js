@@ -2,7 +2,7 @@
 
 const express = require("express");
 const router = express.Router();
-const bcryptFunction = require("../middleware/bcryp")
+const bcryptFunction = require("../middleware/bcrypt")
 
 
 //Registro

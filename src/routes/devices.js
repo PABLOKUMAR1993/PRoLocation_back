@@ -12,7 +12,7 @@ require("dotenv").config();
 /**
  * Método que devuelve la ubicación actual de los dos dispositivos.
  */
-router.get("/lastPositionOfAllDevices", passport.authenticate('jwt', { session: false }), (req, res) => {
+router.get("/lastPositionOfAllDevices", (req, res) => {
 
     axios.get(`${process.env.API_URL}?user=${process.env.API_USER}
     &password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)

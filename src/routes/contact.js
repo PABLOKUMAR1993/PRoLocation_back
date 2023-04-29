@@ -2,32 +2,24 @@
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
-require ('dotenv').config();
+require('dotenv').config();
 
 // Rest
 
-/**
- * Raúl, cambia este método por el de node mailer o bien reutilizalo si fuera necesario.
- */
 router.post('/contact', async (req, res) => {
 
-    const { email, subject, message } = req.body;
-    const file = req.files[0];
+    const { name, email, subject, message } = req.body;
+
     contentHTML = `
         <h1>Información del usuario</h1>
         <ul>
+            <li>Nombre: ${name}</li>
             <li>Email: ${email}</li>
-            <li>Subject: ${subject}</li>
-          </ul>
+            <li>Asunto: ${subject}</li>
+        </ul>
         <p>${message}</p>
-        
     `;
     console.log(contentHTML);
-
-    const fileData = JSON.parse(JSON.stringify(file));
-    for (const prop in fileData) {
-        console.log(`${prop}: ${fileData[prop]}`);
-    }
 
     //Configuración del host
     const transporter = nodemailer.createTransport({
@@ -50,23 +42,22 @@ router.post('/contact', async (req, res) => {
 
     //Método asincrono para envío de correo
     const info = await transporter.sendMail({
-        from: "'PRoLocation'<process.env.EMAIL>",
+        from: "'PRoLocation'<prolocationtfg@gmail.com>",
         to: 'rh_gil@yahoo.es',
         subject: 'Formulario de contacto',
-        html: contentHTML,
-        /*attachments: [
-            {
-              filename: '1682274239051 - 52714.jpg',
-              path: '../uploads/1682274239051 - 52714.jpg'
-            }
-          ]*/
+        html: contentHTML
     })
 
     console.log("Mensaje enviado", info.messageId);
-    res.send({ mensaje: "Mensaje recibido" });
-    
-});
+    res.send("El correo ha sido enviado correctamente");
 
+});
+attachments: [
+    {
+      filename: '1682274239051 - 52714.jpg',
+      path: '../uploads'
+    }
+  ]
 // Export
 
 module.exports = router;

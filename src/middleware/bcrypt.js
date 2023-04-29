@@ -5,6 +5,6 @@ function bcryptFunction (req, res, next) {
     user.password = bcrypt.hashSync(user.password, 10); //Se encripta la contraseña
     req.body = user; // Usuario con la contraseña cifrada
     next(); // Llama a la siguiente función, en este caso req y res
-}
+};
 
 module.exports = bcryptFunction;
