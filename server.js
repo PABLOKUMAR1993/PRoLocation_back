@@ -17,7 +17,7 @@ const jwt = require('jsonwebtoken');
 
 // BBDD
 
-MongoClient.connect(process.env.DB_URL,{ useUnifiedTopology: true }, (err, client) => {
+MongoClient.connect(process.env.DB_URL, { useUnifiedTopology: true }, (err, client) => {
     err != null ? console.log(`Error al conectar a la bbdd: ${err}`) : app.locals.db = client.db(process.env.DB_NAME);
 });
 
@@ -47,16 +47,16 @@ La variable secret debe contener la clave secreta que se utilizará.
 const options = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: secret
-  };
+};
 
 
 function createToken(user) {
-  const payload = {
-    sub: user.id,
-    iat: Date.now(),
-    exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // Una semana
-  };
-  return jwt.sign(payload, secret);
+    const payload = {
+        sub: user.id,
+        iat: Date.now(),
+        exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // Una semana
+    };
+    return jwt.sign(payload, secret);
 }
 
 // Uso de la función createToken
@@ -80,23 +80,23 @@ app.use(
         secret: "secret", // Es una cadena utilizada para firmar la cookie de sesión, lo que aumenta la seguridad.
         resave: false, //Indica si se debe volver a guardar la sesión en el almacenamiento de sesión incluso si la sesión no se ha modificado durante la solicitud.
         saveUnitialialized: false, //indica si se debe volver a guardar la sesión en el almacenamiento de sesión incluso si la sesión no se ha modificado durante la solicitud.
-        cookie: {maxAge: 60000} // Configura la duración de la cookie de sesión se establece en 60000 milisegundos, que son 60 segundos (1 minuto).
+        cookie: { maxAge: 60000 } // Configura la duración de la cookie de sesión se establece en 60000 milisegundos, que son 60 segundos (1 minuto).
     })
 );
 app.use(passport.initialize()); // Nos permite inicializar el cliente local de Passpot para indicar a Passport como identificar a los usuarios
 app.use(passport.session());//Nos permite manejar las sesiones.
 
-passport.use(new JwtStrategy(options, function(jwt_payload, done) {
+passport.use(new JwtStrategy(options, function (jwt_payload, done) {
     // Aquí se puede validar el JWT y buscar al usuario en la base de datos
-      if (jwt_payload.sub === '1234567890') {
-      console.log(jwt_payload.sub);
-      return done(null, { id: '1234567890' });
+    if (jwt_payload.sub === '1234567890') {
+        console.log(jwt_payload.sub);
+        return done(null, { id: '1234567890' });
     } else {
-      return done(null, false);
+        return done(null, false);
     }
-  }));
+}));
 
-  // Comprobamos si el usuario existe y la contraseña es correcta.
+// Comprobamos si el usuario existe y la contraseña es correcta.
 
 passport.use(
     new LocalStrategy(
@@ -161,7 +161,7 @@ passport.deserializeUser((id, done) => {
 app.post("/api/login", passport.authenticate("local", {
     successRedirect: "/api",
     failureRedirect: "/api/fail"
-}),function(req, res) {
+}), function (req, res) {
     const payload = { sub: req.body.id };
     const token = jwt.sign(payload, secret);
     console.log(payload);
@@ -178,7 +178,7 @@ app.get("/api", (req, res) => {
         console.log("Token generado a través de /api: ");
         console.log(token);
         return res.send({ mensaje: "Logueado correctamente", token });
-        
+
     }
 });
 
