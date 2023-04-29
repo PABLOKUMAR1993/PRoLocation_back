@@ -9,6 +9,8 @@ app.set('key', keys.key);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+//Antes de quitar la parte de autenticación
+
 // BBDD
 
 MongoClient.connect(process.env.DB_URL,{ useUnifiedTopology: true }, (err, client) => {
