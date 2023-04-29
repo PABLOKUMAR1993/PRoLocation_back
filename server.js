@@ -196,13 +196,13 @@ app.put("/api/logout", function (req, res) {
 
 // Routes
 
-const devices = require("./routes/devices");
+const devices = require("./src/routes/devices");
 app.use("/api/devices", devices);
 
-const contact = require("./routes/contact");
+const contact = require("./src/routes/contact");
 app.use("/api", contact);
 
-const register = require("./routes/register");
+const register = require("./src/routes/register");
 app.use("/api", register);
 
 
