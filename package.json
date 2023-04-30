@@ -10,17 +10,14 @@
     "mongodb": "4.2",
     "mongoose": "^7.0.5",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.1",
-    "passport": "^0.6.0",
-    "passport-jwt": "^4.0.1",
-    "passport-local": "^1.0.0"
+    "nodemailer": "^6.9.1"
   },
   "name": "pro_location",
   "version": "1.0.0",
   "description": "pro location server",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/server.js"
   },
   "repository": {
     "type": "git",
@@ -32,5 +29,8 @@
     "url": "https://github.com/PABLOKUMAR1993/PRoLocation_back/issues"
   },
   "homepage": "https://github.com/PABLOKUMAR1993/PRoLocation_back#readme",
-  "keywords": []
+  "keywords": [],
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
 }

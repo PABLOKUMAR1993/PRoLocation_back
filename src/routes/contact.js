@@ -1,14 +1,19 @@
+"use strict";
+
 // Importaciones
+
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// Rest
+
+// Métodos Rest
+
 
 router.post('/contact', async (req, res) => {
 
-    const { name, email, subject, message } = req.body;
+    const {name, email, subject, message} = req.body;
 
     contentHTML = `
         <h1>Información del usuario</h1>
@@ -52,12 +57,12 @@ router.post('/contact', async (req, res) => {
     res.send("El correo ha sido enviado correctamente");
 
 });
-attachments: [
-    {
-      filename: '1682274239051 - 52714.jpg',
-      path: '../uploads'
-    }
-  ]
-// Export
+attachments: [{
+    filename: '1682267317431 - dibujo.jpg',
+    path: '../uploads'
+}];
+
+
+// Exportaciones
 
 module.exports = router;
