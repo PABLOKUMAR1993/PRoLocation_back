@@ -14,7 +14,8 @@ require("dotenv").config();
 /**
  * Método que devuelve la ubicación actual de los dos dispositivos.
  */
-router.get("/lastPositionOfAllDevices", verifyToken, async (req, res) => {
+//router.get("/lastPositionOfAllDevices", verifyToken, async (req, res) => {
+router.get("/lastPositionOfAllDevices", async (req, res) => {
 
     await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}
     &password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
@@ -25,6 +26,19 @@ router.get("/lastPositionOfAllDevices", verifyToken, async (req, res) => {
         .catch(error => console.error(error));
 
 });
+
+// Método que devuelve la ubicación actual del dispositivo con la id del dispositivo pasado por parametros.
+    router.get("/lastPositionDevicesId/:id", async (req, res) => {
+        await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}
+        &password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
+            .then(response => {
+                console.log("Estoy despues de la consulta axios")
+                console.log(response.data.id);
+                res.send(response.data.posts);
+            })
+            .catch(error => console.error(error));
+    
+    });
 
 // Devuelve los datos con las coordenadas del dispositivo de Raúl desde una fecha de 500 en 500.
 router.get("/dataByDayIdLastFiveHundredRaul", (req, res) => {
@@ -56,16 +70,21 @@ router.get("/dataByDayIdLastFiveHundredPavlo", (req, res) => {
 router.get("/saveDataAllDevice", (req, res) => {
 
     const db = req.app.locals.db;
+    // Se hace la petición a la api para traer los datos de todos los dispositivos
     axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}`)
         .then(response => {
+            // Se almacenan los dispositivos
             let dispositivos = response.data;
+            // Se muestran dispositivos en consola
             console.log(response.data.posts);
+            //Se guardan los dispositivos en la base de datos
             db.collection("devices").insertOne(dispositivos, function (err, respuesta) {
                     if (err != null) {
                         console.log("Ha habido un error: ");
                         console.log(err);
                         res.send({mensaje: "Ha habido un error: " + err});
                     } else {
+                        // Si el proceso es correcto muestra por consola y envia los dispositivos
                         console.log("Los datos de los dispositivos se han guardado en la BBDD correctamente");
                         res.send({
                             mensaje: "Los datos de los dispositivos se han guardados en la BBDD correctamente: ",

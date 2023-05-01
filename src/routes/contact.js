@@ -1,21 +1,22 @@
 "use strict";
-
 // Importaciones
-
 const express = require('express');
 const router = express.Router();
 const nodemailer = require('nodemailer');
+
 require('dotenv').config();
 
 
-// Métodos Rest
-
+// Rest
 
 router.post('/contact', async (req, res) => {
-
-    const {name, email, subject, message} = req.body;
-
-    contentHTML = `
+    const { name, email, subject, message } = req.body;
+    
+    console.log(name);
+    console.log(email);
+    console.log(subject);
+    console.log(message);
+    /*contentHTML = `
         <h1>Información del usuario</h1>
         <ul>
             <li>Nombre: ${name}</li>
@@ -23,8 +24,8 @@ router.post('/contact', async (req, res) => {
             <li>Asunto: ${subject}</li>
         </ul>
         <p>${message}</p>
-    `;
-    console.log(contentHTML);
+    `;*/
+    //console.log(contentHTML);
 
     //Configuración del host
     const transporter = nodemailer.createTransport({
@@ -50,19 +51,19 @@ router.post('/contact', async (req, res) => {
         from: "'PRoLocation'<prolocationtfg@gmail.com>",
         to: 'rh_gil@yahoo.es',
         subject: 'Formulario de contacto',
-        html: contentHTML
+        //html: contentHTML
     })
 
     console.log("Mensaje enviado", info.messageId);
     res.send("El correo ha sido enviado correctamente");
 
 });
-attachments: [{
-    filename: '1682267317431 - dibujo.jpg',
-    path: '../uploads'
-}];
-
-
-// Exportaciones
+attachments: [
+    {
+      filename: '1682274239051 - 52714.jpg',
+      path: '../uploads'
+    }
+  ]
+// Export
 
 module.exports = router;

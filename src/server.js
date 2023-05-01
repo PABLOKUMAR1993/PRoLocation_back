@@ -6,14 +6,15 @@ const express = require('express');
 const app = express();
 require("dotenv").config();
 const MongoClient = require("mongodb").MongoClient;
-const multer = require("multer");
-
+const bodyParser = require('body-parser');
+//const multer = require("multer");
 
 //Middleware
 
 app.use(express.urlencoded({extended: false}));
+//app.use(bodyParser.urlencoded({ extended: false }));
+//app.use(bodyParser.json());
 app.use(express.json());
-
 
 // BBDD
 
@@ -31,27 +32,33 @@ MongoClient.connect(process.env.DB_URL,
 
 // Multer
 
-const storage = multer.diskStorage({
+/*const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "/src/uploads"); // Dónde se guardará
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + " - " + file.originalname); // Fecha actual + nombre original (evita duplicidad).
     }
-});
-const upload = multer({storage: storage});
+});*/
 
 
 // Routes
-
-const devices = require("./routes/devices");
-app.use("/api/devices", devices);
 
 const contact = require("./routes/contact");
 app.use("/api", contact);
 
 const register = require("./routes/auth");
 app.use("/api", register);
+
+const users = require("./routes/users");
+app.use("/api", users);
+
+const vehicles = require("./routes/vehicles");
+app.use("/api", vehicles);
+
+const devices = require("./routes/devices");
+app.use("/api", devices);
+
 
 
 // Server
