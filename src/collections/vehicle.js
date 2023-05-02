@@ -1,3 +1,18 @@
+/* Patrón para crear vehiculos
+
+{
+    "marca": "Ford",
+    "modelo": "Focus",
+    "chasis": "987654321",
+    "matricula": "1111BBB",
+    "fechaAlta": "2020-01-01",
+    "estado": "operativo",
+    "dispositivo": {},
+    "conductor": [],
+    "mantenimiento": []
+}
+
+*/
 const vehicles = [
     {
         _id: 01,

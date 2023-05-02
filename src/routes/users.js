@@ -13,6 +13,28 @@ router.post("/createUser", (req, res) => {
     const db = req.app.locals.db;
     const user = req.body;
     // Busca el usuario que coincida con el email pasado por parámetro
+    db.collection("users").insertOne(user, function (err, respuesta) {
+        // Si se produce un error al intentar insertar el usuario, devuelve un error
+        if (err != null) {
+            console.log("Ha habido un error al insertar en createUser: ");
+            console.log(err);
+            res.send({ mensaje: "Ha habido un error al insertar en createUser: " + err });
+            // Si no se produce error, inserta el usuario en la db y envia mensaje de Vehículo creado correctamente.
+        } else {
+            console.log("Usuario creado correctamente");
+            res.send({ mensaje: "Usuario creado correctamente" });
+        }
+    });
+
+});
+
+
+//Añadir usuario
+//Método que crea un nuevo usuario en la base de datos
+router.post("/createUser2", (req, res) => {
+    const db = req.app.locals.db;
+    const user = req.body;
+    // Busca el usuario que coincida con el email pasado por parámetro
     db.collection("users")
         .find({ email: user.email })
         .toArray(function (err, users) {

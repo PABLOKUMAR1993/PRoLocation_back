@@ -1,3 +1,17 @@
+/* Patrón para crear dispositivos
+
+{
+    "idDispositivo": "350424069304218"
+    "marca": "Teltonika",
+    "modelo": "FMT100",
+    "estado": "instalado",
+    "fechaInstalacion": "2023-03-01"
+    "posicion": [],
+}
+
+*/
+
+
 const vehicles = [
     {
         _id: "123456789",

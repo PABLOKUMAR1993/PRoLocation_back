@@ -30,7 +30,16 @@ router.post("/signup", bcryptEncrypt, async (req, res) => {
         // Si no ha encontrado usuarios, lo inserto.
         if ( user.length === 0 ) {
             await db.collection( process.env.DB_COLECTION_USERS )
-            .insertOne({ user: userBody.user, email: userBody.email, password: userBody.password },
+            .insertOne({ 
+                role: userBody.role,
+                name: userBody.name,
+                email: userBody.email,
+                password: userBody.password,
+                birthDate: userBody.birthDate,
+                registrationDate: userBody.registrationDate,
+                estate: userBody.estate,
+                vehicles: userBody.vehicles
+             },
                 (err, data) => {
                 if (err != null) {
                     console.log( `Ha habido un error al crear el usuario: ${err}` );

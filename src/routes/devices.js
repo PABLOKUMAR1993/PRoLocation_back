@@ -11,9 +11,9 @@ require("dotenv").config();
 
 // Métodos Rest
 
-/**
- * Método que devuelve la ubicación actual de los dos dispositivos.
- */
+
+// Método que devuelve la ubicación actual de todos dispositivos.
+
 //router.get("/lastPositionOfAllDevices", verifyToken, async (req, res) => {
 router.get("/lastPositionOfAllDevices", async (req, res) => {
 
@@ -41,27 +41,20 @@ router.get("/lastPositionOfAllDevices", async (req, res) => {
               res.send('No se encontró ningún dispositivo con esa ID');
               return;
             }
-            // Si se encuentra un dispositivo con el "id" especificado, enviar una respuesta con los datos del dispositivo
-            /*console.log(`group: ${device.group}`);
-            console.log(`idExternal: ${device.idExternal}`);
-            console.log(`speed: ${device.speed}`);
-            console.log(`lat: ${device.lat}`);
-            console.log(`lon: ${device.lon}`);
-            console.log(`TimeStamp: ${device.TimeStamp}`);
-            console.log(`id: ${device.id}`);*/
+
             console.log(device);
             res.send(device);
           })
           .catch(error => console.error(error));
       });
 
-// Devuelve los datos con las coordenadas del dispositivo de Raúl desde una fecha de 500 en 500.
-router.get("/dataByDayIdLastFiveHundredRaul", (req, res) => {
-
-    axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}
-    &dIni=2023-03-31%2000:10&id=${process.env.API_ID_RAUL}&metode=${process.env.API_METODE_DATE}`)
+// Devuelve los datos con las coordenadas del dispositivo pasado por parametro desde una fecha y hora pasadas por parametros de 500 en 500.
+router.get("/dataByDayIdLastFiveHundredRaul/:id/:fecha/:hora", (req, res) => {
+    const idDevice = req.params.id; console.log("Id device: " + idDevice);
+    const fecha = req.params.fecha; console.log("Año: " + fecha);
+    const hora = req.params.hora; console.log("Hora: " + hora);
+    axios.get(`https://awsio.automaticaplus.es/awsGPStempsReal.php?user=tfgmadrid&password=qs_2023*FF8301CB&dIni=${fecha}%2000:${hora}&id=${idDevice}&metode=recuperaDesDeData`)
         .then(response => {
-            console.log(response.data.posts);
             res.send(response.data.posts);
         })
         .catch(error => console.error(error));
