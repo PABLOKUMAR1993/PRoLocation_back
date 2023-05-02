@@ -31,14 +31,29 @@ router.get("/lastPositionOfAllDevices", async (req, res) => {
     router.get("/lastPositionDevicesId/:id", async (req, res) => {
         await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}
         &password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
-            .then(response => {
-                console.log("Estoy despues de la consulta axios")
-                console.log(response.data.id);
-                res.send(response.data.posts);
-            })
-            .catch(error => console.error(error));
-    
-    });
+          .then(response => {
+            console.log("Estoy despues de la consulta axios")
+            // Obtenemos los datos de respuesta de la API
+            const data = response.data;
+            const device = data.posts.find(post => post.id === req.params.id);
+            // Si no se encuentra ningún dispositivo con el "id" especificado, se envía una respuesta con un mensaje de error
+            if (!device) {
+              res.send('No se encontró ningún dispositivo con esa ID');
+              return;
+            }
+            // Si se encuentra un dispositivo con el "id" especificado, enviar una respuesta con los datos del dispositivo
+            /*console.log(`group: ${device.group}`);
+            console.log(`idExternal: ${device.idExternal}`);
+            console.log(`speed: ${device.speed}`);
+            console.log(`lat: ${device.lat}`);
+            console.log(`lon: ${device.lon}`);
+            console.log(`TimeStamp: ${device.TimeStamp}`);
+            console.log(`id: ${device.id}`);*/
+            console.log(device);
+            res.send(device);
+          })
+          .catch(error => console.error(error));
+      });
 
 // Devuelve los datos con las coordenadas del dispositivo de Raúl desde una fecha de 500 en 500.
 router.get("/dataByDayIdLastFiveHundredRaul", (req, res) => {
