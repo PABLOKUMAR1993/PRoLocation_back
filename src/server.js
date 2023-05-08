@@ -6,23 +6,21 @@ const express = require('express');
 const app = express();
 require("dotenv").config();
 const MongoClient = require("mongodb").MongoClient;
-const bodyParser = require('body-parser');
-const nodemailer = require('nodemailer');
+const cors = require("cors");
 const multer = require("multer");
 
-const upload = multer();
 
-//Middleware
+// Middleware
 
-// Configurar el middleware para procesar datos POST
-app.use(express.urlencoded({ extended: true })); // Para formularios
+app.use(express.urlencoded({extended: true}));
 app.use(express.json());
-app.use(upload.array()); // for parsing multipart/form-data
+app.use(cors());
+
 
 // BBDD
 
 MongoClient.connect(process.env.DB_URL,
-    { useNewUrlParser: true, useUnifiedTopology: true },
+    {useNewUrlParser: true, useUnifiedTopology: true},
     (err, client) => {
         if (err != null) {
             console.log(`Error al conectar a la bbdd: ${err}`);
@@ -37,15 +35,14 @@ MongoClient.connect(process.env.DB_URL,
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "uploads/"); // Dónde se guardará
+        cb(null, "./src/uploads/");
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + " - " + file.originalname); // Fecha actual + nombre original (evita duplicidad).
+        cb(null, Date.now() + " - " + file.originalname);
     }
 });
-
-
-const uploads = multer({ storage: storage });
+const upload = multer({ storage: storage });
+app.use(upload.single("file")); // file es el key del objeto FormData.
 
 
 // Routes
@@ -64,7 +61,6 @@ app.use("/api", vehicles);
 
 const devices = require("./routes/devices");
 app.use("/api", devices);
-
 
 
 // Server
