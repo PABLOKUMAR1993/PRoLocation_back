@@ -1,11 +1,18 @@
 /* Patrón para crear vehiculos
 
 {
+    "idVehiculo": "",
+    "idDispositivo",
+    "idConductor",
+    "idMantenimiento",
+    "tipoVehiculo",
     "marca": "Ford",
     "modelo": "Focus",
     "chasis": "987654321",
     "matricula": "1111BBB",
     "fechaAlta": "2020-01-01",
+    "kmIniciales": "",
+    "kmActuales": "",
     "estado": "operativo",
     "dispositivo": {},
     "conductor": [],

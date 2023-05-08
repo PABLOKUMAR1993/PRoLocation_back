@@ -1,7 +1,8 @@
 /* Patrón para crear dispositivos
 
 {
-    "idDispositivo": "350424069304218"
+    "idDispositivo": "350424069304218",
+    "idPosicion": "",
     "marca": "Teltonika",
     "modelo": "FMT100",
     "estado": "instalado",
@@ -17,12 +18,13 @@ const vehicles = [
         _id: "123456789",
         nombre: "Vehículo 01",
         datosVehiculo: {
-            idLocalizador: "987654321",
-            chasis: "45682",
+            idLocalizador: "",
+            chasis: "",
             matricula: "123ABC",
             marca: "Ford",
             modelo: "Focus",
             tipo: "Turismo",
+            
         },
 
         estadoVehiculo: {
