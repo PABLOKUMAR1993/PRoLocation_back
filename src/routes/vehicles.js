@@ -10,10 +10,10 @@ require("dotenv").config();
 //Método que crea un nuevo vehículo en la base de datos
 router.post("/createVehicle", (req, res) => {
     const db = req.app.locals.db;
-    const vehicle = req.body;
+    const matricula = req.body;
     // Busca el vehículo que coincida con el id pasado por parámetro
     db.collection("vehicles")
-        .find({ _id: vehicle._id })
+        .find({ matricula: vehicle.matricula })
         .toArray(function (err, vehicles) {
             // Si se produce un error envía un mensaje de error
             if (err != null) {
@@ -37,20 +37,44 @@ router.post("/createVehicle", (req, res) => {
                         }
                     });
                 } else {
-                    console.log("Ya existe un vehículo registrado con ese id")
-                    res.send({ mensaje: "Ya existe un vehículo registrado con ese id" });
+                    console.log("Ya existe un vehículo registrado con esa maricula")
+                    res.send({ mensaje: "Ya existe un vehículo registrado con esa maricula" });
                 }
             }
         });
 });
 
-//Método que muestra el vehículo de la base de datos que correponde al id pasado por parámetro
-router.get("/viewVehicle/:_id", (req, res) => {
+//Método que muestra todos los vehículos de la base de datos
+router.get("/viewAllVehicles", (req, res) => {
+  const db = req.app.locals.db;
+  db.collection("vehicles")
+      .find({})
+      .toArray(function (err, vehicles) {
+          if (err != null) {
+              console.log("Ha habido un error al buscar en la db: ");
+              console.log(err);
+              res.send({ mensaje: "Ha habido un error al buscar en la db: " + err });
+              return;
+          } else {
+              // Si no encuentra ningún vehiculo con el mismo id lo inserta en la db
+              if (vehicles.length != 0) {
+                  console.log(vehicles)
+                  res.send(vehicles);
+              } else {
+                  res.send({ mensaje: "No existen vehículos registrados" });
+              }
+          }
+      });
+});
+
+
+//Método que muestra el vehículo de la base de datos que correponde a la matricula pasado por parámetro
+router.get("/viewVehicle/:matricula", (req, res) => {
     const db = req.app.locals.db;
-    const id = req.params._id;
-    console.log(id);
+    const matricula = req.params.matricula;
+    console.log(matricula);
     db.collection("vehicles")
-        .find({ _id: id })
+        .find({ matricula: matricula })
         .toArray(function (err, vehicles) {
             if (err != null) {
                 console.log("Ha habido un error al buscar en la db: ");
@@ -63,12 +87,49 @@ router.get("/viewVehicle/:_id", (req, res) => {
                     console.log(vehicles[0])
                     res.send(vehicles[0]);
                 } else {
-                    res.send({ mensaje: "No existe ningún vehículo registrado con ese id" });
+                    res.send({ mensaje: "No existe ningún vehículo registrado con esa matricula" });
                 }
             }
         });
 });
 
+//Método para asignar dispositivo al vehículo
+router.get("/addDevice/:matricula/:idDevice", (req, res) => {
+  const db = req.app.locals.db;
+  const matricula = req.params.matricula;
+  const idDevice = req.params.idDevice;
+
+  db.collection("dispositivos").findOne({ _id: ObjectId(idDevice) }, function (err, dispositivo) {
+    if (err) {
+      console.log("Ha habido un error al buscar el dispositivo: ");
+      console.log(err);
+      res.send({ mensaje: "Ha habido un error al buscar el dispositivo: " + err });
+      return;
+    }
+
+    if (!dispositivo) {
+      console.log("No se encontró un dispositivo con el ID: " + idDevice);
+      res.send({ mensaje: "No se encontró un dispositivo con el ID: " + idDevice });
+      return;
+    }
+
+    db.collection("vehicles").updateOne(
+      { matricula: matricula },
+      { $push: { dispositivo: dispositivo } },
+      function (err, result) {
+        if (err != null) {
+          console.log("Ha habido un error al actualizar el vehículo: ");
+          console.log(err);
+          res.send({ mensaje: "Ha habido un error al actualizar el vehículo: " + err });
+          return;
+        } else {
+          console.log("Dispositivo agregado con éxito al vehículo con matrícula: " + matricula);
+          res.send({ mensaje: "Dispositivo agregado con éxito al vehículo con matrícula: " + matricula });
+        }
+      }
+    );
+  });
+});
 
 // Método para editar el idLocalizador de un vehículo
 router.put("/uploadVehicleId/:_id/:newId", (req, res) => {

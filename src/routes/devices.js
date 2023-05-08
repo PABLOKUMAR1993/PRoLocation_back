@@ -159,6 +159,53 @@ router.get("/saveDataByDayIdLastFiveHundredPavlo", (req, res) => {
 
 });
 
+/**
+ * Método que reciba los datos de un dispositivo y añada los campos idDispositivo, longitud, latitud y velocidad a la base de datos posicion. 
+ */
+
+ router.get("/addPosition", (req, res) => {
+
+    // Conexión a la base de datos
+    const db = req.app.locals.db;
+
+    // Obtenemos de los dispositivos desde la API externa
+    axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&dIni=2023-03-31%2000:10&id=${process.env.API_ID_PAVLO}&metode=${process.env.API_METODE_DATE}`)
+        .then(response => {
+            // Obtenemos las posiciones de los dispositivos y creación de un objeto para cada dispositivo con su id y su posición
+            let devices = response.data;
+            let positions = devices.posts.map(device => {
+                return {
+                    idDevice: device.id,
+                    longitud: device.longitude,
+                    latitud: device.latitude,
+                    speed: device.speed
+                }
+            });
+
+            // Inserción de las posiciones en la colección "position" de la base de datos
+            db.collection("position").insertMany(positions, function (err, respuesta) {
+                if (err != null) {
+                    console.log("Ha habido un error: ");
+                    console.log(err);
+                    res.send({mensaje: "Ha habido un error: " + err});
+                } else {
+                    console.log("Los datos de los dispositivos se han guardado en la BBDD correctamente");
+
+                    // Devolución de un objeto con el mensaje de éxito y el array de posiciones de los dispositivos
+                    res.send({
+                        mensaje: "Los datos de los dispositivos se han guardados en la BBDD correctamente: ",
+                        positions
+                    });
+                }
+            });
+        }).catch(error => console.error(error));
+});
+
+//1. Necesito que me lleguen los datos del dispositivo que le pase la id por parametro 
+
+//2. Buscar el dispositivo en la base de datos por el id recibido y guarde en el array posición los campos longitud, latitud y velocidad
+
+
 
 // Export
 
