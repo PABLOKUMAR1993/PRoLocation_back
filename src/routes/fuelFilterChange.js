@@ -1,0 +1,18 @@
+"use strict";
+
+// Importaciones
+
+const express = require('express');
+const router = express.Router();
+require('dotenv').config();
+
+//Método para crear un cambio de combustible
+
+
+
+
+
+
+// Export
+
+module.exports = router;

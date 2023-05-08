@@ -62,6 +62,29 @@ app.use("/api", vehicles);
 const devices = require("./routes/devices");
 app.use("/api", devices);
 
+const airFilterChange = require("./routes/airFilterChange");
+app.use("/api", airFilterChange);
+
+const distributionChange = require("./routes/distributionChange");
+app.use("/api", distributionChange);
+
+const fuelFilterChange = require("./routes/fuelFilterChange");
+app.use("/api", fuelFilterChange)
+
+const maintenance = require("./routes/maintenance");
+app.use("/api", maintenance)
+
+const oilChange = require("./routes/oilChange");
+app.use("/api", oilChange)
+
+const oilFilterChange = require("./routes/oilFilterChange");
+app.use("/api", oilFilterChange)
+
+const pollenFilterChange = require("./routes/pollenFilterChange");
+app.use("/api", pollenFilterChange)
+
+
+
 
 // Server
 
