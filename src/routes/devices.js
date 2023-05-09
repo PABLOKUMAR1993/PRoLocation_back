@@ -11,6 +11,25 @@ require("dotenv").config();
 
 // Métodos Rest
 
+//Método para crear un dispositivo
+router.post("/createDevice", (req, res) => {
+    const db = req.app.locals.db;
+    const device = req.body;
+
+    db.collection("devices").insertOne(device, function (err, respuesta) {
+       
+        if (err != null) {
+            console.log("Ha habido un error al insertar en devices: ");
+            console.log(err);
+            res.send({ mensaje: "Ha habido un error al insertar en devices: " + err });
+        
+        } else {
+            console.log("Devicee creado correctamente");
+            res.send({ mensaje: "Device creado correctamente" });
+        }
+    });
+
+});
 
 // Método que devuelve la ubicación actual de todos dispositivos.
 

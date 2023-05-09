@@ -31,14 +31,13 @@ router.post("/signup", bcryptEncrypt, async (req, res) => {
         if ( user.length === 0 ) {
             await db.collection( process.env.DB_COLECTION_USERS )
             .insertOne({ 
-                role: userBody.role,
-                name: userBody.name,
+                nombre: userBody.nombre,
+                apellido: userBody.apellido,
                 email: userBody.email,
                 password: userBody.password,
-                birthDate: userBody.birthDate,
-                registrationDate: userBody.registrationDate,
-                estate: userBody.estate,
-                vehicles: userBody.vehicles
+                fechaAlta: userBody.fechaAlta,
+                estado: userBody.estado,
+                vehiculos: userBody.vehiculos
              },
                 (err, data) => {
                 if (err != null) {

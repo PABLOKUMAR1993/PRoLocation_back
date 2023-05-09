@@ -1,7 +1,6 @@
 /* Patrón para crear usuarios
 
    {
-  "idUsuario": "",
   "idVehiculo": "",
   "nombre": "raul",
   "apellido": "herrera",

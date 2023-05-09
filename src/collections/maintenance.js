@@ -4,9 +4,9 @@
     "idCambioAceite": "",
     "idCambioFiltroAceite": "",
     "idCambioFiltroAire": "",
-    "isCambioFiltroCombustible": "",
+    "idCambioFiltroCombustible": "",
     "idCambioFiltroPollen": "",
-    "idCambioDistribucion": ""
+    "idCambioDistribucion": "",
     "cambioAceite": {},
     "cambioFiltroAceite": {},
     "cambioFiltroAire": {},

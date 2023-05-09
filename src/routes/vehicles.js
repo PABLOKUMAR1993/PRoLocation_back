@@ -10,8 +10,8 @@ require("dotenv").config();
 //Método que crea un nuevo vehículo en la base de datos
 router.post("/createVehicle", (req, res) => {
     const db = req.app.locals.db;
-    const matricula = req.body;
-    // Busca el vehículo que coincida con el id pasado por parámetro
+    const vehicle = req.body;
+    // Busca el vehículo que coincida con la matricula pasado por parámetro
     db.collection("vehicles")
         .find({ matricula: vehicle.matricula })
         .toArray(function (err, vehicles) {
@@ -42,6 +42,62 @@ router.post("/createVehicle", (req, res) => {
                 }
             }
         });
+});
+
+// Metodo para agregar un dispositivo pasando su id a un vehiculo pasada su matricula
+router.get('/addDeviceToVehicle/:idDispositivo/:matricula', async function(req, res) {
+  // Obtener la instancia de la base de datos desde el objeto "req.app.locals"
+  const db = req.app.locals.db;
+
+  try {
+    // Obtener el id del dispositivo y la matrícula del vehículo desde los parámetros de la URL
+    const matricula = req.params.matricula;
+    console.log(matricula);
+    const id = req.params.idDispositivo;
+    console.log(id);
+   
+    // Obtener el dispositivo por su id desde la colección "devices" de la base de datos
+    const vehiculo = await db.collection('vehicles').findOne({ matricula });
+    console.log(vehiculo);
+    
+    // Si el vehiculo no se encuentra, devolver un mensaje de error y un estado 404
+    if (!vehiculo) {
+      res.status(404).json({ mensaje: 'Vehiculo no encontrado' });
+      return;
+    }
+
+    // Buscar el dispositivo por su idDispositivo en la colección "devices" de la base de datos
+    const dispositivo = await db.collection('devices').findOne({ id });
+    console.log(dispositivo);
+
+    // Si el dispositivo no se encuentra, devolver un mensaje de error y un estado 404
+    if (!dispositivo) {
+      res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
+      return;
+    }
+
+    // Comprobar si el dispositivo ya está en la lista de dispositivos del vehiculo
+    const dispositivoExistente = vehiculo.dispositivos.find(d => d.idDispositivo === id);
+
+    if (dispositivoExistente) {
+      // Si el vehículo ya está en la lista de vehículos del usuario, devolver un mensaje de error y un estado 409
+      res.status(409).json({ mensaje: 'El dispositivo ya está asociado al vehiculo' });
+      return;
+    } else {
+      // Si el dispositivo no está en la lista de dispositivos del vehiculo, agregar una referencia al dispositivo en la lista de dispositivos del vehiculo
+      dispositivo.vehicles.push({ matricula, idDispositivo: id });
+    
+      // Actualizar el vehiculo en la base de datos con la lista de dispositivo actualizada
+      await db.collection('vehicles').updateOne({ matricula }, { $set: { devices: vehiculo.devices } });
+
+      // Devolver el vehiculo actualizado como respuesta en formato JSON
+      res.json(vehiculo);
+    }
+  } catch (error) {
+    // Si ocurre un error al buscar el vehichulo o al actualizar la base de datos, devolver un mensaje de error y un estado 500
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
+  }
 });
 
 //Método que muestra todos los vehículos de la base de datos

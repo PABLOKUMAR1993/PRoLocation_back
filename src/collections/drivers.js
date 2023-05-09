@@ -1,7 +1,6 @@
 /* Patrón para crear dispositivos
 
 {
-    "idConductor": "",
     "nombre": "Pepe"
     "dni": "11111111P",
     "fechaAlta": "2020-07-20",
