@@ -43,7 +43,9 @@ router.post("/createVehicle", (req, res) => {
             }
         });
 });
-
+/********************************************************************************************* */
+/************************************ PENDIENTE DE FUNCIONAR ********************************* */
+/********************************************************************************************* */
 // Metodo para agregar un dispositivo pasando su id a un vehiculo pasada su matricula
 router.get('/addDeviceToVehicle/:idDispositivo/:matricula', async function(req, res) {
   // Obtener la instancia de la base de datos desde el objeto "req.app.locals"
@@ -55,12 +57,12 @@ router.get('/addDeviceToVehicle/:idDispositivo/:matricula', async function(req, 
     console.log(matricula);
     const id = req.params.idDispositivo;
     console.log(id);
-   
-    // Obtener el dispositivo por su id desde la colección "devices" de la base de datos
+
+    // Obtener el vehículo por su matricula desde la colección "vehicles" de la base de datos
     const vehiculo = await db.collection('vehicles').findOne({ matricula });
     console.log(vehiculo);
-    
-    // Si el vehiculo no se encuentra, devolver un mensaje de error y un estado 404
+
+    // Si el vehículo no se encuentra, devolver un mensaje de error y un estado 404
     if (!vehiculo) {
       res.status(404).json({ mensaje: 'Vehiculo no encontrado' });
       return;
@@ -76,29 +78,32 @@ router.get('/addDeviceToVehicle/:idDispositivo/:matricula', async function(req, 
       return;
     }
 
-    // Comprobar si el dispositivo ya está en la lista de dispositivos del vehiculo
+    // Comprobar si el dispositivo ya está en la lista de dispositivos del vehículo
     const dispositivoExistente = vehiculo.dispositivos.find(d => d.idDispositivo === id);
 
     if (dispositivoExistente) {
-      // Si el vehículo ya está en la lista de vehículos del usuario, devolver un mensaje de error y un estado 409
+      // Si el dispositivo ya está asociado al vehículo, devolver un mensaje de error y un estado 409
       res.status(409).json({ mensaje: 'El dispositivo ya está asociado al vehiculo' });
       return;
     } else {
-      // Si el dispositivo no está en la lista de dispositivos del vehiculo, agregar una referencia al dispositivo en la lista de dispositivos del vehiculo
-      dispositivo.vehicles.push({ matricula, idDispositivo: id });
+      // Si el dispositivo no está en la lista de dispositivos del vehículo, agregar una referencia al dispositivo en la lista de dispositivos del vehículo
+      vehiculo.dispositivos.push({ idDispositivo: id, dispositivo: dispositivo });
     
-      // Actualizar el vehiculo en la base de datos con la lista de dispositivo actualizada
-      await db.collection('vehicles').updateOne({ matricula }, { $set: { devices: vehiculo.devices } });
+      // Actualizar el vehículo en la base de datos con la lista de dispositivos actualizada
+      await db.collection('vehicles').updateOne({ matricula }, { $set: { dispositivos: vehiculo.dispositivos } });
 
-      // Devolver el vehiculo actualizado como respuesta en formato JSON
+      // Devolver el vehículo actualizado como respuesta en formato JSON
       res.json(vehiculo);
     }
   } catch (error) {
-    // Si ocurre un error al buscar el vehichulo o al actualizar la base de datos, devolver un mensaje de error y un estado 500
+    // Si ocurre un error al buscar el vehículo o al actualizar la base de datos, devolver un mensaje de error y un estado 500
     console.error(error);
     res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 });
+
+
+
 
 //Método que muestra todos los vehículos de la base de datos
 router.get("/viewAllVehicles", (req, res) => {
@@ -148,6 +153,35 @@ router.get("/viewVehicle/:matricula", (req, res) => {
             }
         });
 });
+
+//Método que muestra los vehiculos asignados a un usuario 
+router.post("/viewVehiclesUser", (req, res) => {
+  const db = req.app.locals.db;
+  const email = req.body.email;
+  console.log(email);
+  db.collection("users")
+      .find({ email: email })
+      .project({ vehiculos: 1 }) // Solo obtener el campo "vehiculos"
+      .toArray(function (err, result) {
+          if (err != null) {
+              console.log("Ha habido un error al buscar en la db: ");
+              console.log(err);
+              res.send({ mensaje: "Ha habido un error al buscar en la db: " + err });
+              return;
+          } else {
+              // Si encuentra vehiculos, enviar el array con todos los atributos
+              if (result.length != 0 && result[0].vehiculos) {
+                  console.log(result[0].vehiculos);
+                  res.send(result[0].vehiculos.map(vehiculo => {
+                      return {...vehiculo};
+                  }));
+              } else {
+                  res.send({ mensaje: "No se encontraron vehículos para este usuario" });
+              }
+          }
+      });
+});
+
 
 //Método para asignar dispositivo al vehículo
 router.get("/addDevice/:matricula/:idDevice", (req, res) => {
