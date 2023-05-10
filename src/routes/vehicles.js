@@ -47,50 +47,53 @@ router.post("/createVehicle", (req, res) => {
 /************************************ PENDIENTE DE FUNCIONAR ********************************* */
 /********************************************************************************************* */
 // Metodo para agregar un dispositivo pasando su id a un vehiculo pasada su matricula
-router.get('/addDeviceToVehicle/:idDispositivo/:matricula', async function(req, res) {
+router.get('/addDeviceToVehicle/:matricula/:idDispositivo', async function(req, res) {
   // Obtener la instancia de la base de datos desde el objeto "req.app.locals"
   const db = req.app.locals.db;
 
   try {
-    // Obtener el id del dispositivo y la matrícula del vehículo desde los parámetros de la URL
+    // Obtener la matrícula del vehículo y el id del dispositivo desde los parámetros de la URL
     const matricula = req.params.matricula;
-    console.log(matricula);
-    const id = req.params.idDispositivo;
-    console.log(id);
+    const idDispositivo = req.params.idDispositivo;
 
-    // Obtener el vehículo por su matricula desde la colección "vehicles" de la base de datos
+    // Buscar el vehículo por su matrícula en la colección "vehiculos" de la base de datos
     const vehiculo = await db.collection('vehicles').findOne({ matricula });
     console.log(vehiculo);
 
     // Si el vehículo no se encuentra, devolver un mensaje de error y un estado 404
     if (!vehiculo) {
-      res.status(404).json({ mensaje: 'Vehiculo no encontrado' });
+      res.status(404).json({ mensaje: 'Vehículo no encontrado' });
       return;
     }
 
-    // Buscar el dispositivo por su idDispositivo en la colección "devices" de la base de datos
-    const dispositivo = await db.collection('devices').findOne({ id });
-    console.log(dispositivo);
+    // Buscar el dispositivo por su matrícula en la colección "devices" de la base de datos
+    const dispositivo = await db.collection('devices').findOne({ idDispositivo });
 
-    // Si el dispositivo no se encuentra, devolver un mensaje de error y un estado 404
-    if (!dispositivo) {
+     // Si el vehículo no se encuentra, devolver un mensaje de error y un estado 404
+     if (!dispositivo) {
       res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
       return;
     }
 
-    // Comprobar si el dispositivo ya está en la lista de dispositivos del vehículo
-    const dispositivoExistente = vehiculo.dispositivos.find(d => d.idDispositivo === id);
+     // Comprobar si el dispositivo ya está en la lista de dispositivos del vehículo
+     const dispositivoExistente = vehiculo.dispositivo.find(d => d.idDispositivo === idDispositivo);
+     console.log(dispositivoExistente);
 
+     
     if (dispositivoExistente) {
-      // Si el dispositivo ya está asociado al vehículo, devolver un mensaje de error y un estado 409
-      res.status(409).json({ mensaje: 'El dispositivo ya está asociado al vehiculo' });
+      // Si el dispositivo ya está en la lista de dispositivos del vehículo, devolver un mensaje de error y un estado 409
+      res.status(409).json({ mensaje: 'El dispositivo ya está asociado al vehículo' });
       return;
     } else {
       // Si el dispositivo no está en la lista de dispositivos del vehículo, agregar una referencia al dispositivo en la lista de dispositivos del vehículo
-      vehiculo.dispositivos.push({ idDispositivo: id, dispositivo: dispositivo });
-    
+      const dispositivoNuevo = {
+        idDispositivo: idDispositivo
+      };
+      
+      vehiculo.dispositivo.push(dispositivoNuevo);
+
       // Actualizar el vehículo en la base de datos con la lista de dispositivos actualizada
-      await db.collection('vehicles').updateOne({ matricula }, { $set: { dispositivos: vehiculo.dispositivos } });
+      await db.collection('vehicles').updateOne({ matricula }, { $set: { dispositivo: vehiculo.dispositivo } });
 
       // Devolver el vehículo actualizado como respuesta en formato JSON
       res.json(vehiculo);
@@ -155,7 +158,7 @@ router.get("/viewVehicle/:matricula", (req, res) => {
 });
 
 //Método que muestra los vehiculos asignados a un usuario 
-router.post("/viewVehiclesUser", (req, res) => {
+router.get("/viewVehiclesUser", (req, res) => {
   const db = req.app.locals.db;
   const email = req.body.email;
   console.log(email);
@@ -189,7 +192,7 @@ router.get("/addDevice/:matricula/:idDevice", (req, res) => {
   const matricula = req.params.matricula;
   const idDevice = req.params.idDevice;
 
-  db.collection("dispositivos").findOne({ _id: ObjectId(idDevice) }, function (err, dispositivo) {
+  db.collection("devices").findOne({ _id: ObjectId(idDevice) }, function (err, dispositivo) {
     if (err) {
       console.log("Ha habido un error al buscar el dispositivo: ");
       console.log(err);
