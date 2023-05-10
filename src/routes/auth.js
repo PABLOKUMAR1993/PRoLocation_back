@@ -14,7 +14,7 @@ require("dotenv").config();
 
 ////// SignUp.
 
-router.post("/signup", bcryptEncrypt, async (req, res) => {
+router.post("/signup", bcryptEncrypt, (req, res) => {
 
     // Recupero la conexión a la bbdd.
     const db = req.app.locals.db;
@@ -23,7 +23,7 @@ router.post("/signup", bcryptEncrypt, async (req, res) => {
     const userBody = req.body;
 
     // Compruebo si el usuario ya existe.
-    await db.collection( process.env.DB_COLECTION_USERS )
+    db.collection( process.env.DB_COLECTION_USERS )
     .find({ email: userBody.email })
     .toArray( async (err, user) => {
 
@@ -59,7 +59,7 @@ router.post("/signup", bcryptEncrypt, async (req, res) => {
 
 ////// SignIn.
 
-router.post("/signin", async (req, res) => {
+router.post("/signin", (req, res) => {
 
     // Recupero la conexión a la bbdd.
     const db = req.app.locals.db;
@@ -68,7 +68,7 @@ router.post("/signin", async (req, res) => {
     const userBody = req.body;
 
     // Compruebo si el usuario existe.
-    await db.collection( process.env.DB_COLECTION_USERS )
+    db.collection( process.env.DB_COLECTION_USERS )
     .find({ email: userBody.email })
     .toArray( async (err, user) => {
         if ( err != null ) {
@@ -77,14 +77,13 @@ router.post("/signin", async (req, res) => {
         } else {
 
             // Parseo el usuario para poder acceder a sus propiedades.
-            const userP = JSON.parse(JSON.stringify(user));
+            // const userP = JSON.parse(JSON.stringify(user));
 
             // Compruebo si la contraseña es correcta.
-            if ( bcryptDecrypt( userBody.password, userP[0].password ) ) {
-                console.log( "SignIn: Contraseña correcta." );
+            if ( bcryptDecrypt( userBody.password, user[0].password ) ) {
                 // Genero el token y lo envío.
-                const token = generateToken( userP[0] );
-                res.status(200).send({ token });
+                const token = generateToken( user[0] );
+                res.status(200).send({ token: token, user: user[0] });
             } else {
                 console.log( "SignIn: Contraseña incorrecta." );
                 res.status(401).send({ mensaje: "SignIn: Contraseña incorrecta." });
