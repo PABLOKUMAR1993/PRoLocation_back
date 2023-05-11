@@ -12,14 +12,14 @@ require("dotenv").config();
  */
 
 // Metodo para agregar un vehículo a un usuario
-router.get('/addVehicleToUser/:email/:matricula', async function(req, res) {
+router.post('/addVehicleToUser', async function(req, res) {
   // Obtener la instancia de la base de datos desde el objeto "req.app.locals"
   const db = req.app.locals.db;
 
   try {
     // Obtener el correo electrónico del usuario y la matrícula del vehículo desde los parámetros de la URL
-    const email = req.params.email;
-    const matricula = req.params.matricula;
+    const email = req.body.email;
+    const matricula = req.body.matricula;
 
     // Obtener el usuario por su correo electrónico desde la colección "usuarios" de la base de datos
     const usuario = await db.collection('users').findOne({ email });
@@ -50,21 +50,9 @@ router.get('/addVehicleToUser/:email/:matricula', async function(req, res) {
       // Si el vehículo no está en la lista de vehículos del usuario, agregar una referencia al vehículo en la lista de vehículos del usuario
       const vehiculoNuevo = {
         _id: vehiculo._id,
-        idDispositivo: vehiculo.idDispositivo,
-        idConductor: vehiculo.idConductor,
-        idMantenimiento: vehiculo.idMantenimiento,
-        tipoVehiculo: vehiculo.tipoVehiculo,
-        marca: vehiculo.marca,
-        modelo: vehiculo.modelo,
-        chasis: vehiculo.chasis,
-        matricula: vehiculo.matricula,
-        fechaAlta: vehiculo.fechaAlta,
-        kmIniciales: vehiculo.kmIniciales,
-        kmActuales: vehiculo.kmActuales,
-        estado: vehiculo.estado
       };
       
-      usuario.vehiculos.push(vehiculoNuevo);
+      usuario.vehiculos.push(vehiculoNuevo._id);
 
       // Actualizar el usuario en la base de datos con la lista de vehículos actualizada
       await db.collection('users').updateOne({ email }, { $set: { vehiculos: usuario.vehiculos } });

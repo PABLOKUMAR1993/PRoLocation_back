@@ -2,7 +2,7 @@
 
 {
     "idDispositivo": "",
-    "idConductor": "",
+    "idConductores": [],
     "idMantenimiento": "",
     "tipoVehiculo": "",
     "marca": "Ford",
@@ -12,10 +12,22 @@
     "fechaAlta": "2020-01-01",
     "kmIniciales": "",
     "kmActuales": "",
+    "estado": "operativo"
+}
+
+{
+    "idDispositivo": "",
+    "idConductores": [],
+    "idMantenimiento": "",
+    "tipoVehiculo": "",
+    "marca": "Peugeot",
+    "modelo": "406",
+    "chasis": "123456789",
+    "matricula": "0000AAA",
+    "fechaAlta": "2023-01-01",
+    "kmIniciales": "",
+    "kmActuales": "",
     "estado": "operativo",
-    "dispositivo": {},
-    "conductor": [],
-    "mantenimiento": []
 }
 
 */
