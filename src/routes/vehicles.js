@@ -206,7 +206,7 @@ router.get("/viewVehiclesUser", (req, res) => {
 
 
 //Método para asignar dispositivo al vehículo
-router.get("/addDevice/:matricula/:idDevice", (req, res) => {
+router.post("/addDevice/:matricula/:idDevice", (req, res) => {
   const db = req.app.locals.db;
   const matricula = req.params.matricula;
   const idDevice = req.params.idDevice;

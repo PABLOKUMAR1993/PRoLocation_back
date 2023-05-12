@@ -1,13 +1,12 @@
 /* Patrón para crear usuarios
 
    {
-  "idVehiculo": "",
-  "nombre": "raul",
-  "apellido": "herrera",
-  "email": "raul@yahoo.es",
+  "nombre": "mortadelo",
+  "apellido": "",
+  "email": "mortadelo",
   "password": "1234",
   "fechaAlta": "2023-01-01",
-  "estado": "activo",
+  "estado": "true",
   "vehiculos": []
   }
 

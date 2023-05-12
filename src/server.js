@@ -62,26 +62,29 @@ app.use("/api", vehicles);
 const devices = require("./routes/devices");
 app.use("/api", devices);
 
-const airFilterChange = require("./routes/airFilterChange");
+const positions = require("./routes/positions");
+app.use("/api", positions)
+
+const airFilterChange = require("./routes/airFilterChanges");
 app.use("/api", airFilterChange);
 
-const distributionChange = require("./routes/distributionChange");
+const distributionChange = require("./routes/distributionChanges");
 app.use("/api", distributionChange);
 
-const fuelFilterChange = require("./routes/fuelFilterChange");
-app.use("/api", fuelFilterChange)
+const fuelFilterChanges = require("./routes/fuelFilterChanges");
+app.use("/api", fuelFilterChanges)
 
-const maintenance = require("./routes/maintenance");
-app.use("/api", maintenance)
+const maintenances = require("./routes/maintenances");
+app.use("/api", maintenances)
 
-const oilChange = require("./routes/oilChange");
-app.use("/api", oilChange)
+const oilChanges = require("./routes/oilChanges");
+app.use("/api", oilChanges)
 
-const oilFilterChange = require("./routes/oilFilterChange");
-app.use("/api", oilFilterChange)
+const oilFilterChanges = require("./routes/oilFilterChanges");
+app.use("/api", oilFilterChanges)
 
-const pollenFilterChange = require("./routes/pollenFilterChange");
-app.use("/api", pollenFilterChange)
+const pollenFilterChanges = require("./routes/pollenFilterChanges");
+app.use("/api", pollenFilterChanges)
 
 
 

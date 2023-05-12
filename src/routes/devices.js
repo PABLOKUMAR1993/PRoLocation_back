@@ -31,53 +31,6 @@ router.post("/createDevice", (req, res) => {
 
 });
 
-//Asignar posicion al dispositivo
-router.post('/addPositionToDevice', async function (req, res) {
-    // Obtener la instancia de la base de datos desde el objeto "req.app.locals"
-    const db = req.app.locals.db;
-  
-    try {
-      // Obtener la matrícula del vehículo y el id del dispositivo desde los parámetros de la URL
-      const idPosition = req.body.matricula;
-      const idDispositivo = req.body.idDispositivo;
-  
-      // Buscar el vehículo por su matrícula en la colección "vehiculos" de la base de datos
-      const vehiculo = await db.collection('vehicles').findOne({ matricula });
-      console.log(vehiculo);
-  
-      // Si el vehículo no se encuentra, devolver un mensaje de error y un estado 404
-      if (!vehiculo) {
-        res.status(404).json({ mensaje: 'Vehículo no encontrado' });
-        return;
-      }
-      // Buscar el dispositivo por su matrícula en la colección "devices" de la base de datos
-      const dispositivo = await db.collection('devices').findOne({ idDispositivo });
-      // Si el vehículo no se encuentra, devolver un mensaje de error y un estado 404
-      if (!dispositivo) {
-        res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
-        return;
-      }
-      // Comprobar si el dispositivo ya está en la lista de dispositivos del vehículo
-      if (vehiculo.idDispositivo) {
-        if (vehiculo.idDispositivo === dispositivo._id) {
-          res.status(409).json({ mensaje: 'El dispositivo ya está asociado al vehículo' });
-        // Actualizar el vehículo en la base de datos con la lista de dispositivos actualizada
-        } else {
-          await db.collection('vehicles').updateOne({ matricula }, { $set: { idDispositivo: dispositivo._id } });
-        }
-      } else {
-        // Si está vacío.
-        await db.collection('vehicles').updateOne({ matricula }, { $set: { idDispositivo: dispositivo._id } });
-      }
-      // Devolver el vehículo actualizado como respuesta
-      res.send(vehiculo);
-    } catch (error) {
-      // Si ocurre un error al buscar el vehículo o al actualizar la base de datos, devolver un mensaje de error y un estado 500
-      console.error(error);
-      res.status(500).json({ mensaje: 'Error interno del servidor' });
-    }
-  });
-
 // Método que devuelve la ubicación actual de todos dispositivos.
 
 //router.get("/lastPositionOfAllDevices", verifyToken, async (req, res) => {
