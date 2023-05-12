@@ -6,6 +6,7 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 const { verifyToken }  = require("../middleware/jwt");
+const ObjectId = require('mongodb').ObjectId;
 require("dotenv").config();
 
 
@@ -38,13 +39,13 @@ router.post('/addPositionToDevice', async function (req, res) {
   
     try {
       // Obtener los datos por el body
-      const _id = req.body.idPosicion;
+      const idPosicion = req.body.idPosicion;
       const idDispositivo = req.body.idDispositivo;
-      console.log(_id);
+      console.log(idPosicion);
       console.log(idDispositivo);
   
       // Buscar la posicion por su _id en la colección "positions" de la base de datos
-      const posicion = await db.collection('positions').findOne({ _id });
+      const posicion = await db.collection('positions').findOne({ _id: ObjectId(idPosicion) });
       console.log(posicion);
   
       // Si dispositivo no se encuentra, devolver un mensaje de error y un estado 404
@@ -60,16 +61,20 @@ router.post('/addPositionToDevice', async function (req, res) {
         return;
       }
       // Comprobar si la posicion ya está en la lista de posiciones del dispositivo
-      if (dispositivo.idPosicion) {
-        if (dispositivo.idPosicion === posicion._id) {
+      if (dispositivo.posiciones) {
+        if (dispositivo.posiciones === posicion._id) {
           res.status(409).json({ mensaje: 'La posicion ya está asociada al dispositivo' });
         // Actualizar el dispositivo en la base de datos con la lista de dispositivos actualizada
         } else {
-          await db.collection('devices').updateOne({ dispositivo }, { $set: { idPosicion: posicion._id } });
+          await db.collection('devices').updateOne({ dispositivo }, { $set: { posiciones: posicion._id } });
         }
       } else {
-        // Si está vacío.
-        await db.collection('devices').updateOne({ dispositivo }, { $set: { idPosicion: posicion._id } });
+      // Si el vehículo no está en la lista de vehículos del usuario, agregar una referencia al vehículo en la lista de vehículos del usuario
+      const nuevaPosicion = {
+        idPosicion: dispositivo.posiciones,
+      };
+      
+      dispositivo.posiciones.push(nuevaPosicion._id);
       }
       // Devolver el dispositivoactualizado como respuesta
       res.send(dispositivo);
