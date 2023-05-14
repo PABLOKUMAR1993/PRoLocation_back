@@ -4,6 +4,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
+const ObjectId = require('mongodb').ObjectId;
 require("dotenv").config();
 
 //Añadir vehículo
@@ -76,7 +77,7 @@ router.post('/addDeviceToVehicle', async function (req, res) {
     if (vehiculo.idDispositivo) {
       if (vehiculo.idDispositivo === dispositivo._id) {
         res.status(409).json({ mensaje: 'El dispositivo ya está asociado al vehículo' });
-      // Actualizar el vehículo en la base de datos con la lista de dispositivos actualizada
+        // Actualizar el vehículo en la base de datos con la lista de dispositivos actualizada
       } else {
         await db.collection('vehicles').updateOne({ matricula }, { $set: { idDispositivo: dispositivo._id } });
       }
@@ -119,9 +120,9 @@ router.get("/viewAllVehicles", (req, res) => {
 
 
 //Método que muestra el vehículo de la base de datos que correponde a la matricula pasado por parámetro
-router.get("/viewVehicle/:matricula", (req, res) => {
-  const db = req.app.locals.db;
-  const matricula = req.params.matricula;
+router.get("/viewVehicleByMatricula", (req, res) => {
+  const db = req.app.body.db;
+  const matricula = req.body.matricula;
   console.log(matricula);
   db.collection("vehicles")
     .find({ matricula: matricula })
@@ -143,8 +144,7 @@ router.get("/viewVehicle/:matricula", (req, res) => {
     });
 });
 
-//Método que muestra los vehiculos asignados a un usuario 
-
+//Método que muestra los vehiculos asignados a un usuario pasando su email
 router.get("/viewVehiclesUser", (req, res) => {
   const db = req.app.locals.db;
   const email = req.body.email;
@@ -204,12 +204,59 @@ router.get("/viewVehiclesUser", (req, res) => {
     });
 });
 
+//Método que la posición de un vehiculo pasando su id 
+router.get("/viewLastPositionVehicle", async (req, res) => {
+  const db = req.app.locals.db;
+  const idVehiculo = req.body.idVehiculo;
+
+  //Comprueba si el formato del id es correcto o no. 
+  //Este debe ser tipo cadena de 12 bytes, una cadena de 24 caracteres hexadecimales o un número entero.
+  const idPosicionRegExp = /^[0-9a-fA-F]{24}$/; // Expresión regular para validar una cadena de 24 caracteres hexadecimales
+
+  if (!idPosicionRegExp.test(idVehiculo)) {
+    res.status(400).json({ mensaje: 'La ID de posición no tiene el formato correcto' });
+    return;
+  }
+
+  // Buscamos el vehículo por su "_id" en la colección "vehicles"
+  const vehiculo = await db.collection("vehicles").findOne({ _id: ObjectId(idVehiculo) });
+  console.log();
+  console.log("idVehiculo: " + idVehiculo);
+  console.log();
+  console.log("Vehiculo: ");
+  console.log(vehiculo);
+  const dispositivo = await db.collection("devices").findOne({ _id: ObjectId(vehiculo.idDispositivo) });
+  console.log();
+  console.log("Dispositivo: ");
+  console.log();
+  console.log(dispositivo);
+
+  //const posicion = await db.collection("positions").find( dispositivo.posiciones[0]);
+  //console.log(posicion);
+  const ultimaPosicion = dispositivo.posiciones.length - 1
+  const posicion = await db.collection("devices").findOne(dispositivo.posiciones[ultimaPosicion]);
+  console.log(posicion);
+  console.log();
+  console.log("UltimaPosicion: ");
+  console.log(ultimaPosicion);
+  console.log();
+  console.log("Dispositivo.posiciones: ");
+  console.log(dispositivo.posiciones);
+
+  if (dispositivo.posiciones.length > 0) {
+    console.log(`Contenido del array "posiciones" del dispositivo: ${dispositivo.posiciones}`);
+  } else {
+    console.log("El array 'posiciones' del dispositivo está vacío.");
+  }
+
+
+});
 
 //Método para asignar dispositivo al vehículo
-router.post("/addDevice/:matricula/:idDevice", (req, res) => {
+router.post("/addDeviceToVehicle", (req, res) => {
   const db = req.app.locals.db;
-  const matricula = req.params.matricula;
-  const idDevice = req.params.idDevice;
+  const matricula = req.body.matricula;
+  const idDevice = req.body.idDevice;
 
   db.collection("devices").findOne({ _id: ObjectId(idDevice) }, function (err, dispositivo) {
     if (err) {
