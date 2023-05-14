@@ -145,9 +145,9 @@ router.get("/viewVehicleByMatricula", (req, res) => {
 });
 
 //Método que muestra los vehiculos asignados a un usuario pasando su email
-router.get("/viewVehiclesUser", (req, res) => {
+router.get("/viewVehiclesUser/:email", (req, res) => {
   const db = req.app.locals.db;
-  const email = req.body.email;
+  const email = req.params.email;
 
   // Buscamos el usuario por su email en la colección "users"
   db.collection("users")
@@ -205,9 +205,9 @@ router.get("/viewVehiclesUser", (req, res) => {
 });
 
 //Método que la posición de un vehiculo pasando su id 
-router.get("/viewLastPositionVehicle", async (req, res) => {
+router.get("/viewLastPositionVehicle/:idVehiculo", async (req, res) => {
   const db = req.app.locals.db;
-  const idVehiculo = req.body.idVehiculo;
+  const idVehiculo = req.params.idVehiculo;
 
   // Expresión regular para validar una cadena de 24 caracteres hexadecimales
   const idPosicionRegExp = /^[0-9a-fA-F]{24}$/;
