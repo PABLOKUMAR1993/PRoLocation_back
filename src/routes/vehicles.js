@@ -209,47 +209,54 @@ router.get("/viewLastPositionVehicle", async (req, res) => {
   const db = req.app.locals.db;
   const idVehiculo = req.body.idVehiculo;
 
-  //Comprueba si el formato del id es correcto o no. 
-  //Este debe ser tipo cadena de 12 bytes, una cadena de 24 caracteres hexadecimales o un número entero.
-  const idPosicionRegExp = /^[0-9a-fA-F]{24}$/; // Expresión regular para validar una cadena de 24 caracteres hexadecimales
+  // Expresión regular para validar una cadena de 24 caracteres hexadecimales
+  const idPosicionRegExp = /^[0-9a-fA-F]{24}$/;
 
-  if (!idPosicionRegExp.test(idVehiculo)) {
-    res.status(400).json({ mensaje: 'La ID de posición no tiene el formato correcto' });
-    return;
+  // Comprobamos si el idVehiculo no es una cadena de 24 caracteres hexadecimales válida, en cuyo caso retornamos un error 400.
+  if (typeof idVehiculo !== 'string' || !idPosicionRegExp.test(idVehiculo)) {
+    return res.status(400).json({ mensaje: 'El idVehiculo no tiene el formato correcto.' });
   }
 
-  // Buscamos el vehículo por su "_id" en la colección "vehicles"
-  const vehiculo = await db.collection("vehicles").findOne({ _id: ObjectId(idVehiculo) });
-  console.log();
-  console.log("idVehiculo: " + idVehiculo);
-  console.log();
-  console.log("Vehiculo: ");
-  console.log(vehiculo);
-  const dispositivo = await db.collection("devices").findOne({ _id: ObjectId(vehiculo.idDispositivo) });
-  console.log();
-  console.log("Dispositivo: ");
-  console.log();
-  console.log(dispositivo);
+  try {
+    // Buscamos el vehículo por su "_id" en la colección "vehicles".
+    const vehiculo = await db.collection("vehicles").findOne({ _id: ObjectId(idVehiculo) });
+    console.log(vehiculo);
 
-  //const posicion = await db.collection("positions").find( dispositivo.posiciones[0]);
-  //console.log(posicion);
-  const ultimaPosicion = dispositivo.posiciones.length - 1
-  const posicion = await db.collection("devices").findOne(dispositivo.posiciones[ultimaPosicion]);
-  console.log(posicion);
-  console.log();
-  console.log("UltimaPosicion: ");
-  console.log(ultimaPosicion);
-  console.log();
-  console.log("Dispositivo.posiciones: ");
-  console.log(dispositivo.posiciones);
+    // Si no se encontró el vehículo, retornamos un error 404.
+    if (!vehiculo) {
+      return res.status(404).json({ mensaje: 'No se encontró el vehículo.' });
+    }
 
-  if (dispositivo.posiciones.length > 0) {
-    console.log(`Contenido del array "posiciones" del dispositivo: ${dispositivo.posiciones}`);
-  } else {
-    console.log("El array 'posiciones' del dispositivo está vacío.");
+    // Buscamos el dispositivo asociado al vehículo en la colección "devices".
+    const dispositivo = await db.collection("devices").findOne({ _id: ObjectId(vehiculo.idDispositivo) });
+    console.log(dispositivo);
+
+    // Si no se encontró el dispositivo, retornamos un error 404.
+    if (!dispositivo) {
+      return res.status(404).json({ mensaje: 'No se encontró el dispositivo asociado al vehículo.' });
+    }
+
+    // Obtenemos la última posición del dispositivo.
+    const ultimaPosicion = dispositivo.posiciones[ dispositivo.posiciones.length - 1 ];
+
+    // Convertimos el id de la posición a un objeto ObjectId.
+    const objectIdPosicion = ObjectId(ultimaPosicion);
+
+    // Buscamos la posición en la colección "positions" utilizando el objectIdPosicion.
+    const posicion = await db.collection("positions").findOne({ _id: objectIdPosicion });
+
+    // Si no se encontró la posición, retornamos un error 404.
+    if (!posicion) {
+      return res.status(404).json({ mensaje: 'No se encontró la posición del dispositivo.' });
+    }
+
+    // Si todo ha ido bien, devolvemos la posición.
+    console.log(posicion);
+    res.send(posicion);
+  } catch (error) {
+    // Si se produce un error en la base de datos, retornamos un error 500 con el mensaje de error.
+    res.status(500).json({ mensaje: 'Error en la base de datos.', error });
   }
-
-
 });
 
 //Método para asignar dispositivo al vehículo
