@@ -44,10 +44,8 @@ router.post("/createVehicle", (req, res) => {
       }
     });
 });
-/********************************************************************************************* */
-/************************************ PENDIENTE DE FUNCIONAR ********************************* */
-/********************************************************************************************* */
 
+//Método que añade un dispositivo a un vehículo
 router.post('/addDeviceToVehicle', async function (req, res) {
   // Obtener la instancia de la base de datos desde el objeto "req.app.locals"
   const db = req.app.locals.db;
@@ -120,9 +118,9 @@ router.get("/viewAllVehicles", (req, res) => {
 
 
 //Método que muestra el vehículo de la base de datos que correponde a la matricula pasado por parámetro
-router.get("/viewVehicleByMatricula", (req, res) => {
-  const db = req.app.body.db;
-  const matricula = req.body.matricula;
+router.get("/viewVehicleByMatricula/:matricula", (req, res) => {
+  const db = req.app.locals.db;
+  const matricula = req.params.matricula;
   console.log(matricula);
   db.collection("vehicles")
     .find({ matricula: matricula })

@@ -6,6 +6,7 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 const { verifyToken }  = require("../middleware/jwt");
+const ObjectId = require('mongodb').ObjectId;
 require("dotenv").config();
 
 
@@ -67,6 +68,123 @@ router.get("/lastPositionOfAllDevices", async (req, res) => {
           .catch(error => console.error(error));
       });
 
+// Método que devuelve la ubicación actual del dispositivo con la matricula del vehiculo pasado por parametros.
+
+/**
+ * La idea es buscar el vehiculo por la matricula, ver el id del dispositivo, y a travles del id hacer 
+ * la peticion axios del dispositivo, recoger la fecha, longitud latitud y velocidad, para crear un objeto y devolverlo
+ * por res.send 
+ * TODO
+ */ 
+
+ router.get("/actualPositionVehicleByMatricula/:matricula", async (req, res) => {
+    const db = req.app.locals.db;
+  const matricula = req.params.matricula;
+
+  try {
+    // Buscamos el vehículo por su matrícula en la colección "vehicles"
+    const vehiculo = await db.collection("vehicles").findOne({ matricula });
+
+    if (!vehiculo) {
+      res.send({ mensaje: "No se encontró el vehículo." });
+      return;
+    }
+
+    // Obtenemos el ID de dispositivo del vehículo encontrado
+    const id = vehiculo.idDispositivo;
+    console.log(id);
+
+    // Buscamos el vehículo por su matrícula en la colección "vehicles"
+    const dispositivo = await db.collection("devices").findOne({ _id: ObjectId(id) } );
+    console.log(dispositivo);
+
+    const idDispositivo = dispositivo.idDispositivo;
+    console.log(idDispositivo);
+
+     // Hacemos la consulta Axios con el ID de dispositivo
+     const response = axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&dIni=2023-03-31%2000:10&id=${350424069199477}&metode=${process.env.API_METODE_DATE}`)
+
+    if (!vehiculo) {
+      res.send({ mensaje: "No se encontró el vehículo." });
+      return;
+    }
+
+   
+
+    // Enviamos la respuesta al cliente
+    res.send({ posicion: response.data });
+  } catch (err) {
+    console.log("Ha habido un error al buscar en la db: ", err);
+
+    // Si ocurre un error, enviamos un mensaje de error al cliente
+    res.send({ mensaje: "Ha habido un error al buscar en la db: " + err });
+  }
+});
+        
+        /*else {
+  
+          // Si encontramos el vehiculo y tiene idDispositivo, procedemos a buscar el dispositivo
+          if (result.length != 0 && result.idDispositivo) {
+  
+            // Extraemos los IDs de los vehículos en un array "vehiculosIds"
+            const idDispositivo = result.idDispositivo;
+  
+            // Usamos la función "find()" en la colección "vehiculos" para buscar todos los documentos
+            // cuyo "_id" se encuentre en el array "vehiculosIds"
+            db.collection("vehicles")
+              .find({ _id: { $in: vehiculosIds } })
+              .toArray(function (err, vehiculos) {
+                if (err != null) {
+                  console.log("Ha habido un error al buscar en la db: ");
+                  console.log(err);
+  
+                  // Si ocurre un error, enviamos un mensaje de error al cliente
+                  res.send({ mensaje: "Ha habido un error al buscar en la db: " + err });
+                  return;
+                } else {
+  
+                  // Si encontramos los vehículos, enviamos la información de los mismos al cliente
+                  if (vehiculos.length != 0) {
+                    console.log(vehiculos);
+                    res.send(vehiculos.map(vehiculo => {
+                      return { ...vehiculo };
+                    }));
+                  } else {
+  
+                    // Si no encontramos vehículos, enviamos un mensaje al cliente
+                    res.send({ mensaje: "No se encontraron vehículos para este usuario" });
+                  }
+                }
+              });
+          } else {
+  
+            // Si no encontramos vehículos, enviamos un mensaje al cliente
+            res.send({ mensaje: "No se encontraron vehículos para este usuario" });
+          }
+        }
+      });
+  });*/
+  
+/*router.get("/actualPositionVehicleByMatricula/:matricula", async (req, res) => {
+    await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}
+    &password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
+      .then(response => {
+        console.log("Estoy despues de la consulta axios")
+        // Obtenemos los datos de respuesta de la API
+        const data = response.data;
+        const device = data.posts.find(post => post.id === req.params.id);
+        // Si no se encuentra ningún dispositivo con el "id" especificado, se envía una respuesta con un mensaje de error
+        if (!device) {
+          res.send('No se encontró ningún dispositivo con esa ID');
+          return;
+        }
+
+        console.log(device);
+        res.send(device);
+      })
+      .catch(error => console.error(error));
+  });*/
+
 // Devuelve los datos con las coordenadas del dispositivo pasado por parametro desde una fecha y hora pasadas por parametros de 500 en 500.
 router.get("/dataByDayIdLastFiveHundredRaul/:id/:fecha/:hora", (req, res) => {
     const idDevice = req.params.id; console.log("Id device: " + idDevice);
@@ -94,7 +212,7 @@ router.get("/dataByDayIdLastFiveHundredPavlo", (req, res) => {
 });
 
 // Método para almacenar en la BBDD los datos recibidos de los gpg. 
-router.get("/saveDataAllDevice", (req, res) => {
+router.post("/saveDataAllDevice", (req, res) => {
 
     const db = req.app.locals.db;
     // Se hace la petición a la api para traer los datos de todos los dispositivos
