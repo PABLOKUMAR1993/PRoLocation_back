@@ -5,7 +5,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
-const { verifyToken }  = require("../middleware/jwt");
+const { verifyToken } = require("../middleware/jwt");
 const ObjectId = require('mongodb').ObjectId;
 require("dotenv").config();
 
@@ -18,12 +18,12 @@ router.post("/createDevice", (req, res) => {
     const device = req.body;
 
     db.collection("devices").insertOne(device, function (err, respuesta) {
-       
+
         if (err != null) {
             console.log("Ha habido un error al insertar en devices: ");
             console.log(err);
             res.send({ mensaje: "Ha habido un error al insertar en devices: " + err });
-        
+
         } else {
             console.log("Devicee creado correctamente");
             res.send({ mensaje: "Device creado correctamente" });
@@ -48,25 +48,25 @@ router.get("/lastPositionOfAllDevices", async (req, res) => {
 });
 
 // Método que devuelve la ubicación actual del dispositivo con la id del dispositivo pasado por parametros.
-    router.get("/lastPositionDevicesId/:id", async (req, res) => {
-        await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}
+router.get("/lastPositionDevicesId/:id", async (req, res) => {
+    await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}
         &password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
-          .then(response => {
+        .then(response => {
             console.log("Estoy despues de la consulta axios")
             // Obtenemos los datos de respuesta de la API
             const data = response.data;
             const device = data.posts.find(post => post.id === req.params.id);
             // Si no se encuentra ningún dispositivo con el "id" especificado, se envía una respuesta con un mensaje de error
             if (!device) {
-              res.send('No se encontró ningún dispositivo con esa ID');
-              return;
+                res.send('No se encontró ningún dispositivo con esa ID');
+                return;
             }
 
             console.log(device);
             res.send(device);
-          })
-          .catch(error => console.error(error));
-      });
+        })
+        .catch(error => console.error(error));
+});
 
 // Método que devuelve la ubicación actual del dispositivo con la matricula del vehiculo pasado por parametros.
 
@@ -75,115 +75,86 @@ router.get("/lastPositionOfAllDevices", async (req, res) => {
  * la peticion axios del dispositivo, recoger la fecha, longitud latitud y velocidad, para crear un objeto y devolverlo
  * por res.send 
  * TODO
- */ 
+ */
 
  router.get("/actualPositionVehicleByMatricula/:matricula", async (req, res) => {
     const db = req.app.locals.db;
-  const matricula = req.params.matricula;
-
-  try {
-    // Buscamos el vehículo por su matrícula en la colección "vehicles"
-    const vehiculo = await db.collection("vehicles").findOne({ matricula });
-
-    if (!vehiculo) {
-      res.send({ mensaje: "No se encontró el vehículo." });
-      return;
-    }
-
-    // Obtenemos el ID de dispositivo del vehículo encontrado
-    const id = vehiculo.idDispositivo;
-    console.log(id);
-
-    // Buscamos el vehículo por su matrícula en la colección "vehicles"
-    const dispositivo = await db.collection("devices").findOne({ _id: ObjectId(id) } );
-    console.log(dispositivo);
-
-    const idDispositivo = dispositivo.idDispositivo;
-    console.log(idDispositivo);
-
-     // Hacemos la consulta Axios con el ID de dispositivo
-     const response = axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&dIni=2023-03-31%2000:10&id=${350424069199477}&metode=${process.env.API_METODE_DATE}`)
-
-    if (!vehiculo) {
-      res.send({ mensaje: "No se encontró el vehículo." });
-      return;
-    }
-
+    const matricula = req.params.matricula;
+  
+    try {
+      // Buscamos el vehículo por su matrícula en la colección "vehicles"
+      const vehiculo = await db.collection("vehicles").findOne({ matricula });
+  
+      if (!vehiculo) {
+        res.send({ mensaje: "No se encontró el vehículo." });
+        return;
+      }
+  
+      // Obtenemos el ID de dispositivo del vehículo encontrado
+      const id = vehiculo.idDispositivo;
+      console.log("ID del dispositivo:", id);
+  
+      // Buscamos el dispositivo por su ID en la colección "devices"
+      const dispositivo = await db.collection("devices").findOne({ _id: ObjectId(id) });
+      console.log("Dispositivo encontrado:", dispositivo);
+  
+      if (!dispositivo) {
+        res.send({ mensaje: "No se encontró el dispositivo." });
+        return;
+      }
+  
+      // Buscamos la última posición por su ID en la colección "positions"
+      const ultimaPosicion = await db.collection("positions").findOne({ _id: ObjectId(dispositivo.posiciones[dispositivo.posiciones.length - 1]) });
+      console.log("Última posición:", ultimaPosicion);
+  
+      // Almacenamos los datos de la consulta axios
+      const response = await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`);
+      console.log("Respuesta de la API:", response.data.posts);
+  
+      // ID del dispositivo que queremos
+      const desiredId = dispositivo.idDispositivo;
+  
+      // Buscar el dispositivo en la consulta axios con el ID deseado en el arreglo de respuesta
+      const desiredObject = response.data.posts.find((obj) => obj.id === desiredId);
+      console.log("desireObject: ");
+      console.log(desiredObject);
+      // Comprobamos si se encontró el dispositivo en la respuesta axios y si las latitudes y longitudes son distintas
+      if (desiredObject /*&& (desiredObject.lat != ultimaPosicion.latitud && desiredObject.lon != ultimaPosicion.longitud)*/) {
    
-
-    // Enviamos la respuesta al cliente
-    res.send({ posicion: response.data });
-  } catch (err) {
-    console.log("Ha habido un error al buscar en la db: ", err);
-
-    // Si ocurre un error, enviamos un mensaje de error al cliente
-    res.send({ mensaje: "Ha habido un error al buscar en la db: " + err });
-  }
-});
-        
-        /*else {
+        // Guardar el nuevo objeto en la colección "positions"
+        const newPosition = {
+          id: desiredObject.id,
+          latitud: desiredObject.lat,
+          longitud: desiredObject.lon,
+          velocidad: desiredObject.speed,
+          timestamp: desiredObject.timestamp,
+        };
   
-          // Si encontramos el vehiculo y tiene idDispositivo, procedemos a buscar el dispositivo
-          if (result.length != 0 && result.idDispositivo) {
+        const insertedPosition = await db.collection("positions").insertOne(newPosition);
+        console.log("Posición insertada:", insertedPosition);
   
-            // Extraemos los IDs de los vehículos en un array "vehiculosIds"
-            const idDispositivo = result.idDispositivo;
+        // Actualizar el dispositivo en la base de datos con la nueva posición
+        await db.collection("devices").updateOne(
+          { _id: ObjectId(id) },
+          { $push: { posiciones: insertedPosition.insertedId.toString() } }
+        );
   
-            // Usamos la función "find()" en la colección "vehiculos" para buscar todos los documentos
-            // cuyo "_id" se encuentre en el array "vehiculosIds"
-            db.collection("vehicles")
-              .find({ _id: { $in: vehiculosIds } })
-              .toArray(function (err, vehiculos) {
-                if (err != null) {
-                  console.log("Ha habido un error al buscar en la db: ");
-                  console.log(err);
-  
-                  // Si ocurre un error, enviamos un mensaje de error al cliente
-                  res.send({ mensaje: "Ha habido un error al buscar en la db: " + err });
-                  return;
-                } else {
-  
-                  // Si encontramos los vehículos, enviamos la información de los mismos al cliente
-                  if (vehiculos.length != 0) {
-                    console.log(vehiculos);
-                    res.send(vehiculos.map(vehiculo => {
-                      return { ...vehiculo };
-                    }));
-                  } else {
-  
-                    // Si no encontramos vehículos, enviamos un mensaje al cliente
-                    res.send({ mensaje: "No se encontraron vehículos para este usuario" });
-                  }
-                }
-              });
-          } else {
-  
-            // Si no encontramos vehículos, enviamos un mensaje al cliente
-            res.send({ mensaje: "No se encontraron vehículos para este usuario" });
-          }
-        }
-      });
-  });*/
-  
-/*router.get("/actualPositionVehicleByMatricula/:matricula", async (req, res) => {
-    await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}
-    &password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`)
-      .then(response => {
-        console.log("Estoy despues de la consulta axios")
-        // Obtenemos los datos de respuesta de la API
-        const data = response.data;
-        const device = data.posts.find(post => post.id === req.params.id);
-        // Si no se encuentra ningún dispositivo con el "id" especificado, se envía una respuesta con un mensaje de error
-        if (!device) {
-          res.send('No se encontró ningún dispositivo con esa ID');
-          return;
-        }
-
-        console.log(device);
-        res.send(device);
-      })
-      .catch(error => console.error(error));
-  });*/
+        console.log();
+        console.log("Nueva posición:");
+        console.log();
+        console.log(newPosition);
+        res.send(newPosition);
+      } else {
+        console.log("No se encontró un objeto con el ID deseado o las latitudes y longitudes no coinciden.");
+        res.send({ mensaje: "No se encontró un objeto con el ID deseado o las latitudes y longitudes no coinciden." });
+      }
+    } catch (error) {
+      console.error(error);
+      res.send({ mensaje: "Ocurrió un error al procesar la solicitud." });
+    }
+  });
+    
+    
 
 // Devuelve los datos con las coordenadas del dispositivo pasado por parametro desde una fecha y hora pasadas por parametros de 500 en 500.
 router.get("/dataByDayIdLastFiveHundredRaul/:id/:fecha/:hora", (req, res) => {
@@ -224,19 +195,19 @@ router.post("/saveDataAllDevice", (req, res) => {
             console.log(response.data.posts);
             //Se guardan los dispositivos en la base de datos
             db.collection("devices").insertOne(dispositivos, function (err, respuesta) {
-                    if (err != null) {
-                        console.log("Ha habido un error: ");
-                        console.log(err);
-                        res.send({mensaje: "Ha habido un error: " + err});
-                    } else {
-                        // Si el proceso es correcto muestra por consola y envia los dispositivos
-                        console.log("Los datos de los dispositivos se han guardado en la BBDD correctamente");
-                        res.send({
-                            mensaje: "Los datos de los dispositivos se han guardados en la BBDD correctamente: ",
-                            dispositivos
-                        });
-                    }
+                if (err != null) {
+                    console.log("Ha habido un error: ");
+                    console.log(err);
+                    res.send({ mensaje: "Ha habido un error: " + err });
+                } else {
+                    // Si el proceso es correcto muestra por consola y envia los dispositivos
+                    console.log("Los datos de los dispositivos se han guardado en la BBDD correctamente");
+                    res.send({
+                        mensaje: "Los datos de los dispositivos se han guardados en la BBDD correctamente: ",
+                        dispositivos
+                    });
                 }
+            }
             );
         }).catch(error => console.error(error));
 
@@ -252,18 +223,18 @@ router.get("/saveDataByDayIdLastFiveHundredRaul", (req, res) => {
             let dispositivos = response.data;
             console.log(response.data.posts);
             db.collection("devices").insertOne(dispositivos, function (err, respuesta) {
-                    if (err != null) {
-                        console.log("Ha habido un error: ");
-                        console.log(err);
-                        res.send({mensaje: "Ha habido un error: " + err});
-                    } else {
-                        console.log("Los datos de los dispositivos se han guardado en la BBDD correctamente");
-                        res.send({
-                            mensaje: "Los datos de los dispositivos se han guardados en la BBDD correctamente: ",
-                            dispositivos
-                        });
-                    }
+                if (err != null) {
+                    console.log("Ha habido un error: ");
+                    console.log(err);
+                    res.send({ mensaje: "Ha habido un error: " + err });
+                } else {
+                    console.log("Los datos de los dispositivos se han guardado en la BBDD correctamente");
+                    res.send({
+                        mensaje: "Los datos de los dispositivos se han guardados en la BBDD correctamente: ",
+                        dispositivos
+                    });
                 }
+            }
             );
         }).catch(error => console.error(error));
 
@@ -279,18 +250,18 @@ router.get("/saveDataByDayIdLastFiveHundredPavlo", (req, res) => {
             let dispositivos = response.data;
             console.log(response.data.posts);
             db.collection("devices").insertOne(dispositivos, function (err, respuesta) {
-                    if (err != null) {
-                        console.log("Ha habido un error: ");
-                        console.log(err);
-                        res.send({mensaje: "Ha habido un error: " + err});
-                    } else {
-                        console.log("Los datos de los dispositivos se han guardado en la BBDD correctamente");
-                        res.send({
-                            mensaje: "Los datos de los dispositivos se han guardados en la BBDD correctamente: ",
-                            dispositivos
-                        });
-                    }
+                if (err != null) {
+                    console.log("Ha habido un error: ");
+                    console.log(err);
+                    res.send({ mensaje: "Ha habido un error: " + err });
+                } else {
+                    console.log("Los datos de los dispositivos se han guardado en la BBDD correctamente");
+                    res.send({
+                        mensaje: "Los datos de los dispositivos se han guardados en la BBDD correctamente: ",
+                        dispositivos
+                    });
                 }
+            }
             );
         }).catch(error => console.error(error));
 
@@ -300,7 +271,7 @@ router.get("/saveDataByDayIdLastFiveHundredPavlo", (req, res) => {
  * Método que reciba los datos de un dispositivo y añada los campos idDispositivo, longitud, latitud y velocidad a la base de datos posicion. 
  */
 
- router.get("/addPosition", (req, res) => {
+router.get("/addPosition", (req, res) => {
 
     // Conexión a la base de datos
     const db = req.app.locals.db;
@@ -324,7 +295,7 @@ router.get("/saveDataByDayIdLastFiveHundredPavlo", (req, res) => {
                 if (err != null) {
                     console.log("Ha habido un error: ");
                     console.log(err);
-                    res.send({mensaje: "Ha habido un error: " + err});
+                    res.send({ mensaje: "Ha habido un error: " + err });
                 } else {
                     console.log("Los datos de los dispositivos se han guardado en la BBDD correctamente");
 
