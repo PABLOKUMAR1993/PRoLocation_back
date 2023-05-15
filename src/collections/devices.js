@@ -7,7 +7,7 @@
     "modelo": "FMT100",
     "estado": "instalado",
     "fechaInstalacion": "2023-03-01"
-    "posicion": [],
+    "posiciones": [],
 }
 
 */

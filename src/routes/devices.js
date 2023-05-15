@@ -84,90 +84,84 @@ router.get("/actualPositionVehicleByMatricula/:matricula", async (req, res) => {
     try {
         // Buscamos el vehículo por su matrícula en la colección "vehicles"
         const vehiculo = await db.collection("vehicles").findOne({ matricula });
-
         if (!vehiculo) {
-            res.send({ mensaje: "No se encontró el vehículo." });
-            return;
+            return res.send({ mensaje: "No se encontró el vehículo." });
         }
 
-        // Obtenemos el ID de dispositivo del vehículo encontrado
         const idDispositivo = vehiculo.idDispositivo;
-        console.log();
         console.log("************************* ID del dispositivo: *************************", idDispositivo);
 
         // Buscamos el dispositivo por su ID en la colección "devices"
         const dispositivo = await db.collection("devices").findOne({ _id: ObjectId(idDispositivo) });
-        console.log();
         console.log("************************* Dispositivo encontrado: *************************", dispositivo);
 
         if (!dispositivo) {
-            res.send({ mensaje: "No se encontró el dispositivo." });
-            return;
+            return res.send({ mensaje: "No se encontró el dispositivo." });
         }
 
-        // Buscamos la última posición por su ID en la colección "positions" y la guardamos en una variable
-        const ultimaPosicion = await db.collection("positions").findOne({ _id: ObjectId(dispositivo.posiciones[dispositivo.posiciones.length - 1]) });
-        console.log();
+        // Obtenemos el ID de la última posición del dispositivo
+        const ultimaPosicionID = dispositivo.posiciones[dispositivo.posiciones.length - 1];
+
+        // Buscamos la última posición por su ID en la colección "positions"
+        const ultimaPosicion = await db.collection("positions").findOne({ _id: ObjectId(ultimaPosicionID) });
         console.log("************************* Última posición: *************************", ultimaPosicion);
 
-        // Almacenamos los datos de la consulta axios
+        // Realizamos una consulta a la API utilizando axios
         const response = await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`);
         console.log("************************* Respuesta de la API: *************************", response.data.posts);
 
-        // Buscar el dispositivo en la consulta axios con el ID deseado en el arreglo de respuesta
+        // Buscamos el dispositivo en la respuesta de la API utilizando su ID
         const dispositivoAxios = response.data.posts.find((obj) => obj.id === dispositivo.idDispositivo);
-        console.log();
-        console.log(dispositivo.idDispositivo);
-        console.log();
-        console.log("************************* Response.data.posts: *************************");
-        console.log(response.data.posts);
-        console.log();
         console.log("************************* DispositivoAxios: *************************");
         console.log(dispositivoAxios);
 
-        // Comprobamos si se encontró el dispositivo en la respuesta axios y si las latitudes y longitudes son distintas
-        if (dispositivoAxios && (dispositivoAxios.lat /*!== ultimaPosicion.latitud || dispositivoAxios.lon !== ultimaPosicion.longitud*/)) {
+        if (dispositivoAxios) {
+            console.log("El dispositivo axios existe.");
 
-            // Guardar el nuevo objeto en la colección "positions"
-            const newPosition = {
-                id: dispositivoAxios.id,
-                latitud: dispositivoAxios.lat,
-                longitud: dispositivoAxios.lon,
-                velocidad: dispositivoAxios.speed,
-                timestamp: dispositivoAxios.timestamp,
-            };
+            if (dispositivoAxios.lat !== ultimaPosicion.latitud && dispositivoAxios.lon !== ultimaPosicion.longitud) {
+                // Creamos un objeto con los datos de la nueva posición
+                const newPosition = {
+                    id: dispositivoAxios.id,
+                    latitud: dispositivoAxios.lat,
+                    longitud: dispositivoAxios.lon,
+                    velocidad: dispositivoAxios.speed,
+                    timestamp: dispositivoAxios.TimeStamp,
+                };
 
-            console.log();
-            console.log("NewPosition: ");
-            console.log(newPosition);
-            
-            console.log();
-            console.log("Insertando nueva posicion en positions...");
-            console.log();
-            await db.collection("positions").insertOne(newPosition);
+                console.log("NewPosition:");
+                console.log(newPosition);
 
-            console.log("************************* Posición insertada: *************************");
+                // Insertamos la nueva posición en la colección "positions"
+                await db.collection("positions").insertOne(newPosition);
+                console.log("************************* Posición insertada: *************************");
 
-            // Actualizar el dispositivo en la base de datos con la nueva posición
-            await db.collection("devices").updateOne({ _id: ObjectId(idDispositivo) }, { $push: { posiciones: newPosition._id } });
+                // Actualizamos el dispositivo en la base de datos con la nueva posición
+                await db.collection("devices").updateOne({ _id: ObjectId(idDispositivo) }, { $push: { posiciones: newPosition._id } });
 
-            console.log();
-            console.log("************************* Nueva posición: *************************");
-            console.log();
-            console.log("NewPosition: ");
-            console.log();
-            console.log(newPosition);
-            res.send(newPosition);
+                console.log("************************* Nueva posición: *************************");
+                console.log("NewPosition:");
+                console.log(newPosition);
+
+                return res.send(newPosition);
+            } else {
+                const position = {
+                    latitud: dispositivoAxios.lat,
+                    longitud: dispositivoAxios.lon,
+                    velocidad: dispositivoAxios.speed,
+                    timestamp: dispositivoAxios.TimeStamp,
+                };
+                console.log("Las coordenadas coinciden y no se ha insertado en la colección positions.");
+                return res.send({ position });
+            }
         } else {
             console.log("No se encontró un objeto con el ID deseado o las latitudes y longitudes no coinciden.");
-            res.send({ mensaje: "No se encontró un objeto con el ID deseado o las latitudes y longitudes no coinciden." });
+            return res.send({ mensaje: "No se encontró un objeto con el ID deseado o las latitudes y longitudes no coinciden" });
         }
     } catch (error) {
         console.error(error);
-        res.send({ mensaje: "Ocurrió un error al procesar la solicitud." });
+        return res.send({ mensaje: "Ocurrió un error al procesar la solicitud." });
     }
 });
-
 
 
 
