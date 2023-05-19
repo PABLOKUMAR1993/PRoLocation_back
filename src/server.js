@@ -5,10 +5,9 @@
 const express = require('express');
 const app = express();
 require("dotenv").config();
-const MongoClient = require("mongodb").MongoClient;
 const cors = require("cors");
 const multer = require("multer");
-
+const { connect, getDb } = require("./lib/db");
 
 // Middleware
 
@@ -17,18 +16,14 @@ app.use(express.json());
 app.use(cors());
 
 
-// BBDD
+// MongoDB
 
-MongoClient.connect(process.env.DB_URL,
-    {useNewUrlParser: true, useUnifiedTopology: true},
-    (err, client) => {
-        if (err != null) {
-            console.log(`Error al conectar a la bbdd: ${err}`);
-        } else {
-            console.log("Conexión con la base de datos realizada correctamente");
-            app.locals.db = client.db(process.env.DB_NAME);
-        }
-    });
+function connectToDb() {
+    const db = getDb();
+    app.locals.db = db;
+}
+
+connect().then(() => { connectToDb(); });
 
 
 // Multer
@@ -85,8 +80,6 @@ app.use("/api", oilFilterChanges)
 
 const pollenFilterChanges = require("./routes/pollenFilterChanges");
 app.use("/api", pollenFilterChanges)
-
-
 
 
 // Server
