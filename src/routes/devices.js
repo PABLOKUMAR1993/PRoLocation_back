@@ -6,7 +6,8 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 const { verifyToken } = require("../middleware/jwt");
-const ObjectId = require('mongodb').ObjectId;
+const { ObjectId } = require('mongodb');
+const { findPhisicalDeviceId, findVehicleById } = require("../lib/utils");
 require("dotenv").config();
 
 
@@ -70,98 +71,107 @@ router.get("/lastPositionDevicesId/:id", async (req, res) => {
 
 // Método que devuelve la ubicación actual del dispositivo con la matricula del vehiculo pasado por parametros.
 
+router.get( '/actualPositionVehicleById/:idVehiculo', async ( req, res ) => {
+
+    // Recupero los datos de la API
+    const resApi = await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`);
+    const dataApi = resApi.data.posts;
+
+    // Busco el vehículo.
+    const vehicle = await findVehicleById( req.params.idVehiculo );
+
+    // Recupero el dispositivo físico asociado al vehículo.
+    const device = findPhisicalDeviceId( vehicle.idApi, dataApi );
+
+    // Si el dispositivo no es null, creo un objeto posición y la envío al front.
+    if ( device ) {
+        const position = {
+            _id: "",
+            id: device.id,
+            latitud: device.lat,
+            longitud: device.lon,
+            velocidad: device.speed,
+            timestamp: device.TimeStamp,
+        };
+        res.status(200).send( position );
+        continuar( position );
+    } else {
+        res.status(404).send( { mensaje: "No se encontró el dispositivo." } );
+    }
+
+});
+
+
 /**
- * La idea es buscar el vehiculo por la matricula, ver el id del dispositivo, y a travles del id hacer 
- * la peticion axios del dispositivo, recoger la fecha, longitud latitud y velocidad, para crear un objeto y devolverlo
+ * La idea es buscar el vehiculo por la matricula, ver el id del dispositivo, y a través del id hacer
+ * la petición axios del dispositivo, recoger la fecha, longitud latitud y velocidad, para crear un objeto y devolverlo
  * por res.send 
  * TODO
  */
-
-router.get("/actualPositionVehicleByMatricula/:matricula", async (req, res) => {
-    const db = req.app.locals.db;
-    const matricula = req.params.matricula;
-
-    try {
-        // Buscamos el vehículo por su matrícula en la colección "vehicles"
-        const vehiculo = await db.collection("vehicles").findOne({ matricula });
-        if (!vehiculo) {
-            return res.send({ mensaje: "No se encontró el vehículo." });
-        }
-
-        const idDispositivo = vehiculo.idDispositivo;
-        console.log("************************* ID del dispositivo: *************************", idDispositivo);
-
-        // Buscamos el dispositivo por su ID en la colección "devices"
-        const dispositivo = await db.collection("devices").findOne({ _id: ObjectId(idDispositivo) });
-        console.log("************************* Dispositivo encontrado: *************************", dispositivo);
-
-        if (!dispositivo) {
-            return res.send({ mensaje: "No se encontró el dispositivo." });
-        }
-
-        // Obtenemos el ID de la última posición del dispositivo
-        const ultimaPosicionID = dispositivo.posiciones[dispositivo.posiciones.length - 1];
-
-        // Buscamos la última posición por su ID en la colección "positions"
-        const ultimaPosicion = await db.collection("positions").findOne({ _id: ObjectId(ultimaPosicionID) });
-        console.log("************************* Última posición: *************************", ultimaPosicion);
-
-        // Realizamos una consulta a la API utilizando axios
-        const response = await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`);
-        console.log("************************* Respuesta de la API: *************************", response.data.posts);
-
-        // Buscamos el dispositivo en la respuesta de la API utilizando su ID
-        const dispositivoAxios = response.data.posts.find((obj) => obj.id === dispositivo.idDispositivo);
-        console.log("************************* DispositivoAxios: *************************");
-        console.log(dispositivoAxios);
-
-        if (dispositivoAxios) {
-            console.log("El dispositivo axios existe.");
-
-            if (dispositivoAxios.lat !== ultimaPosicion.latitud && dispositivoAxios.lon !== ultimaPosicion.longitud) {
-                // Creamos un objeto con los datos de la nueva posición
-                const newPosition = {
-                    id: dispositivoAxios.id,
-                    latitud: dispositivoAxios.lat,
-                    longitud: dispositivoAxios.lon,
-                    velocidad: dispositivoAxios.speed,
-                    timestamp: dispositivoAxios.TimeStamp,
-                };
-
-                console.log("NewPosition:");
-                console.log(newPosition);
-
-                // Insertamos la nueva posición en la colección "positions"
-                await db.collection("positions").insertOne(newPosition);
-                console.log("************************* Posición insertada: *************************");
-
-                // Actualizamos el dispositivo en la base de datos con la nueva posición
-                await db.collection("devices").updateOne({ _id: ObjectId(idDispositivo) }, { $push: { posiciones: newPosition._id } });
-
-                console.log("************************* Nueva posición: *************************");
-                console.log("NewPosition:");
-                console.log(newPosition);
-
-                return res.send(newPosition);
-            } else {
-                const position = {
-                    latitud: dispositivoAxios.lat,
-                    longitud: dispositivoAxios.lon,
-                    velocidad: dispositivoAxios.speed,
-                    timestamp: dispositivoAxios.TimeStamp,
-                };
-                console.log("Las coordenadas coinciden y no se ha insertado en la colección positions.");
-                return res.send({ position });
-            }
-        } else {
-            console.log("No se encontró un objeto con el ID deseado o las latitudes y longitudes no coinciden.");
-            return res.send({ mensaje: "No se encontró un objeto con el ID deseado o las latitudes y longitudes no coinciden" });
-        }
-    } catch (error) {
-        console.error(error);
-        return res.send({ mensaje: "Ocurrió un error al procesar la solicitud." });
-    }
-});
+// router.get("/actualPositionVehicleById/:id", async (req, res) => {
+//
+//     try {
+//         const db = req.app.locals.db;
+//         const idVehiculo = req.params.id;
+//
+//         // Buscamos el vehículo por su id en la colección "vehicles"
+//         const vehiculo = await db.collection("vehicles").findOne({ _id: ObjectId( idVehiculo ) });
+//         if (!vehiculo) return res.status(404).send({ mensaje: "No se encontró el vehículo." });
+//
+//         // Buscamos el dispositivo por su ID en la colección "devices"
+//         const dispositivo = await db.collection("devices").findOne({ _id: ObjectId(vehiculo.idDispositivo) });
+//         if (!dispositivo) return res.status(404).send({ mensaje: "No se encontró el dispositivo." });
+//
+//         // Obtenemos el ID de la última posición del dispositivo
+//         if ( dispositivo.posiciones.length === 0 ) return res.status(404).send({ mensaje: "No hay posiciones en el dispositivo." });
+//
+//         // Buscamos la última posición por su ID en la colección "positions"
+//         const ultimaPosicion = await db.collection("positions").findOne({ _id: ObjectId( dispositivo.posiciones[dispositivo.posiciones.length - 1] ) });
+//
+//         // Recuperamos las últimas posiciones de todos los dispositivos.
+//         const responseAxios = await axios.get(`${process.env.API_URL}?user=${process.env.API_USER}&password=${process.env.API_PASS}&metode=${process.env.API_METODE_ALL}`);
+//
+//         // Buscamos el dispositivo en la respuesta de la API utilizando su ID
+//         const dispositivoAxios = responseAxios.data.posts.find( (obj) => obj.id === dispositivo.idDispositivo );
+//         if (!dispositivoAxios) return res.status(404).send({ mensaje: "El dispositivo no se ha encontrado en axios." });
+//
+//         // Comprobamos si las coordenadas de la última posición del dispositivo son diferentes a las de la nueva posición.
+//         if (dispositivoAxios.lat !== ultimaPosicion.latitud && dispositivoAxios.lon !== ultimaPosicion.longitud) {
+//             // Creamos un objeto con los datos de la nueva posición
+//             const newPosition = {
+//                 id: dispositivoAxios.id,
+//                 latitud: dispositivoAxios.lat,
+//                 longitud: dispositivoAxios.lon,
+//                 velocidad: dispositivoAxios.speed,
+//                 timestamp: dispositivoAxios.TimeStamp,
+//             };
+//
+//             // Insertamos la nueva posición en la colección "positions"
+//             await db.collection("positions").insertOne( newPosition );
+//
+//             // Actualizamos el dispositivo en la base de datos con la nueva posición
+//             await db.collection("devices").updateOne({ _id: ObjectId( dispositivo.idDispositivo ) }, { $push: { posiciones: newPosition._id } });
+//
+//             console.log("Las coordenadas no coinciden y se ha creado una nueva positions.");
+//             return res.status(200).send(newPosition);
+//         } else {
+//             const position = {
+//                 _id: "",
+//                 id: dispositivoAxios.id,
+//                 latitud: dispositivoAxios.lat,
+//                 longitud: dispositivoAxios.lon,
+//                 velocidad: dispositivoAxios.speed,
+//                 timestamp: dispositivoAxios.TimeStamp,
+//             };
+//
+//             console.log("Las coordenadas coinciden y no se ha insertado en la colección positions.");
+//             return res.status(200).send( position );
+//         }
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).send({ mensaje: "Ocurrió un error al procesar la solicitud.", error: error });
+//     }
+// });
 
 
 
