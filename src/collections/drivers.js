@@ -1,4 +1,4 @@
-/* Patrón para crear dispositivos
+/* Patrón para crear conductores
 
 {
     "nombre": "Pepe"

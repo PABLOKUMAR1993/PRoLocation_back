@@ -32,7 +32,7 @@ router.post("/createDevice", (req, res) => {
             res.send({ mensaje: "Ha habido un error al insertar en devices: " + err });
 
         } else {
-            console.log("Devicee creado correctamente");
+            console.log("Device creado correctamente");
             res.send({ mensaje: "Device creado correctamente" });
         }
     });
