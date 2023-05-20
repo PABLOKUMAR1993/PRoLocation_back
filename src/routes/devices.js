@@ -321,11 +321,6 @@ router.get("/addPosition", (req, res) => {
         }).catch(error => console.error(error));
 });
 
-//1. Necesito que me lleguen los datos del dispositivo que le pase la id por parametro 
-
-//2. Buscar el dispositivo en la base de datos por el id recibido y guarde en el array posición los campos longitud, latitud y velocidad
-
-
 
 // Export
 
