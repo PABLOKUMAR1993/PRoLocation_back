@@ -379,7 +379,8 @@ router.get("/maintenanceVehicle/:_id", async (req, res) => {
     }
 
     // Se busca el vehículo en la colección "vehicles".
-    const vehicle = await db.collection("vehicles").findOne({ _id: ObjectId(idVehicle) });
+    const vehicle = await findVehicleById(idVehicle);
+    //const vehicle = await db.collection("vehicles").findOne({ _id: ObjectId(idVehicle) });
     console.log("Vehicle: ", vehicle);
 
     //Se comprueba que el vehiculo está en la base de datos

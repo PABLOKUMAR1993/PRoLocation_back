@@ -6,7 +6,6 @@ const { getDb } = require("./db");
 const { ObjectId } = require('mongodb');
 require("dotenv").config();
 
-
 // Métodos
 
 /**
@@ -37,7 +36,7 @@ function findVehicleById( id ) {
 /**
  * Método que busca dispositivo por su idObject.
  */
- function findDeviceByIdObject(id) {
+function findDeviceByIdObject(id) {
     return getDb().collection("devices").findOne({ _id: ObjectId( id ) });
 }
 
