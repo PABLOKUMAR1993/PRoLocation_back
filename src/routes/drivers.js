@@ -124,6 +124,51 @@ router.post('/addDriverToVehicle', async function (req, res) {
   }
 });
 
+//Método que devuelve el conductor del vehiculo
+router.get('/driverVehicle/:idVehiculo', async function (req, res) {
+    const db = req.app.locals.db;
+    try {
+      // Obtener el id del vehículo de los parámetros de la solicitud
+      const idVehiculo = req.params.idVehiculo;
+  
+      // Verificar el formato del idVehiculo
+      if (!ObjectId.isValid(idVehiculo)) {
+        res.status(400).json({ mensaje: 'El id del vehículo no tiene el formato correcto' });
+        return;
+      }
+  
+      // Buscar el vehículo en la base de datos por su id
+      const vehicle = await findVehicleById(idVehiculo);
+  
+      // Comprobar si el vehículo existe
+      if (!vehicle) {
+        res.status(404).json({ mensaje: 'Vehículo no encontrado' });
+        return;
+      }
+  
+      // Verificar si el vehículo tiene un idConductor
+      if (!vehicle.idConductor) {
+        res.status(404).json({ mensaje: 'El vehículo no tiene un conductor asignado' });
+        return;
+      }
+  
+      // Obtener el conductor correspondiente al idConductor del vehículo
+      const driver = await db.collection('drivers').findOne({ "_id": vehicle.idConductor });
+  
+      // Comprobar si el conductor existe
+      if (!driver) {
+        res.status(404).json({ mensaje: 'Conductor no encontrado' });
+        return;
+      }
+  
+      // Devolver el conductor correspondiente al vehículo en la respuesta
+      res.send({ conductor: driver });
+    } catch (error) {
+      console.error('Error al obtener el conductor del vehículo:', error);
+      res.status(500).json({ mensaje: 'Error interno del servidor' });
+    }
+  });
+
 
 
    

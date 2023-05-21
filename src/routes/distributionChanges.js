@@ -7,7 +7,7 @@ const router = express.Router();
 require('dotenv').config();
 
 //Método para crear un cambio de distribución
-router.post("/createOilChange", (req, res) => {
+router.post("/createDistributionChange", (req, res) => {
     const db = req.app.locals.db;
     const distributionChange = req.body;
 

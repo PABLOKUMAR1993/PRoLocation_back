@@ -5,6 +5,7 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 const ObjectId = require('mongodb').ObjectId;
+const {findVehicleById} = require("../lib/utils");
 require("dotenv").config();
 
 //Añadir vehículo
@@ -235,7 +236,7 @@ router.get("/viewLastPositionVehicle/:idVehiculo", async (req, res) => {
     }
 
     // Obtenemos la última posición del dispositivo.
-    const ultimaPosicion = dispositivo.posiciones[ dispositivo.posiciones.length - 1 ];
+    const ultimaPosicion = dispositivo.posiciones[dispositivo.posiciones.length - 1];
 
     // Convertimos el id de la posición a un objeto ObjectId.
     const objectIdPosicion = ObjectId(ultimaPosicion);
@@ -365,6 +366,69 @@ router.delete("/deleteVehicle/:_id", (req, res) => {
     }
   });
 });
+
+// Método que devuelve el mantenimiento de un vehículo de la base de datos que corresponde al _id pasado por parámetro
+router.get("/maintenanceVehicle/:_id", async (req, res) => {
+  try {
+    const db = req.app.locals.db;
+    const idVehicle = req.params._id;
+
+     // Verificamos que el parámetro _id sea un ObjectId válido
+     if (!ObjectId.isValid(idVehicle)) {
+      return res.status(400).send({ mensaje: "El parámetro _id no es un ObjectId válido." });
+    }
+
+    // Se busca el vehículo en la colección "vehicles".
+    const vehicle = await db.collection("vehicles").findOne({ _id: ObjectId(idVehicle) });
+    console.log("Vehicle: ", vehicle);
+
+    //Se comprueba que el vehiculo está en la base de datos
+    if (!vehicle) {
+      return res.status(404).send({ mensaje: "No se encontró el vehículo." });
+    }
+
+    // Se busca el ID de mantenimiento asociado al vehículo en el campo "idMaintenance".
+    const idMaintenanceVehicle = vehicle.idMantenimiento;
+    console.log("idMaintenanceVehicle: ", idMaintenanceVehicle);
+    
+    // Se busca el mantenimiento asignado al vehículo en la colección "maintenance".
+    const maintenance = await db.collection("maintenance").findOne({ _id: ObjectId(idMaintenanceVehicle) });
+    console.log("Maintenance: ", maintenance);
+
+    //Buscamos todos los tipos de cambios asignados al mantenimiento del vehiculo
+    const cambiosAceite = await db.collection("oilChanges").find({ _id: { $in: maintenance.cambioAceite.map(ObjectId) } }).toArray();
+    const cambiosFiltroAceite = await db.collection("oilChanges").find({ _id: { $in: maintenance.cambioFiltroAceite.map(ObjectId) } }).toArray();
+    const cambiosFiltroAire = await db.collection("airFilterChanges").find({ _id: { $in: maintenance.cambioFiltroAire.map(ObjectId) } }).toArray();
+    const cambiosFiltroCombustible = await db.collection("fuelFilterChanges").find({ _id: { $in: maintenance.cambioFiltroCombustible.map(ObjectId) } }).toArray();
+    const cambiosFiltroPollen = await db.collection("pollenFilterChanges").find({ _id: { $in: maintenance.cambioFiltroPollen.map(ObjectId) } }).toArray();
+    const cambiosDistribucion = await db.collection("distributionChanges").find({ _id: { $in: maintenance.cambioDistribucion.map(ObjectId) } }).toArray();
+
+    // Combinamos los cambios en un objeto de respuesta
+    const cambios = {
+      cambiosAceite,
+      cambiosFiltroAceite,
+      cambiosFiltroAire,
+      cambiosFiltroCombustible,
+      cambiosFiltroPollen,
+      cambiosDistribucion
+    };
+
+    if (!maintenance) {
+      return res.status(404).send({ mensaje: "No se encontró el mantenimiento asociado al vehículo." });
+    }
+
+    //Se devuelve el maintenimiento del vehículo con todos sus arrays correspondientes de cada tipo de cambio
+    //return res.status(200).send(maintenance, cambios);
+    //return res.status(200).send(maintenance);
+    console.log(cambios)
+    return res.status(200).send(cambios);
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).send({ mensaje: "Ocurrió un error al obtener el mantenimiento del vehículo." });
+  }
+});
+
+
 
 // Export
 
