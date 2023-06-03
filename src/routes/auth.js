@@ -13,7 +13,6 @@ require("dotenv").config();
 
 
 ////// SignUp.
-
 router.post("/signup", bcryptEncrypt, (req, res) => {
 
     // Recupero la conexión a la bbdd.
@@ -58,7 +57,6 @@ router.post("/signup", bcryptEncrypt, (req, res) => {
 
 
 ////// SignIn.
-
 router.post("/signin", (req, res) => {
 
     // Recupero la conexión a la bbdd.

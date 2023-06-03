@@ -6,7 +6,11 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
-//Método para crear un cambio de distribución
+
+// Métodos Rest.
+
+
+////// Método para crear un cambio de distribución
 router.post("/createDistributionChange", (req, res) => {
     const db = req.app.locals.db;
     const distributionChange = req.body;
@@ -25,9 +29,6 @@ router.post("/createDistributionChange", (req, res) => {
     });
 
 });
-
-
-
 
 
 // Export

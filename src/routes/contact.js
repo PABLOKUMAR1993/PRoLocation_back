@@ -23,8 +23,10 @@ const transporter = nodemailer.createTransport({
 });
 
 
-// Servicios Rest.
+// Métodos Rest
 
+
+////// Método para gestionar el envío de correos electrónicos.
 router.post('/contact', async (req, res) => {
 
     // Extraemos los datos del formulario

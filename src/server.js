@@ -22,7 +22,6 @@ function connectToDb() {
     const db = getDb();
     app.locals.db = db;
 }
-
 connect().then(() => { connectToDb(); });
 
 

@@ -11,9 +11,11 @@ const db = require("../lib/db");
 const {findVehicleById} = require("../lib/utils");
 require("dotenv").config();
 
+
 // Métodos Rest
 
-// Método para crear un conductor
+
+////// Método para crear un conductor.
 router.post("/createDrivers", (req, res) => {
     const db = req.app.locals.db;
     const driver = req.body;
@@ -49,7 +51,7 @@ router.post("/createDrivers", (req, res) => {
         });
 });
 
-//Método que añade un conductor a un vehículo
+////// Método que añade un conductor a un vehículo.
 router.post('/addDriverToVehicle', async function (req, res) {
   try {
     // Obtener la instancia de la base de datos desde el objeto "req.app.locals"
@@ -124,8 +126,8 @@ router.post('/addDriverToVehicle', async function (req, res) {
   }
 });
 
-//Método que devuelve el conductor del vehiculo
-router.get('/driverVehicle/:idVehiculo', async function (req, res) {
+////// Método que devuelve el conductor del vehículo.
+router.get('/driverVehicle/:idVehiculo', verifyToken, async function (req, res) {
     const db = req.app.locals.db;
     try {
       // Obtener el id del vehículo de los parámetros de la solicitud
@@ -157,12 +159,12 @@ router.get('/driverVehicle/:idVehiculo', async function (req, res) {
   
       // Comprobar si el conductor existe
       if (!driver) {
-        res.status(404).json({ mensaje: 'Conductor no encontrado' });
+        res.status(200).send( null );
         return;
       }
   
       // Devolver el conductor correspondiente al vehículo en la respuesta
-      res.send({ conductor: driver });
+      res.status(200).send( driver );
     } catch (error) {
       console.error('Error al obtener el conductor del vehículo:', error);
       res.status(500).json({ mensaje: 'Error interno del servidor' });
@@ -170,41 +172,6 @@ router.get('/driverVehicle/:idVehiculo', async function (req, res) {
   });
 
 
-
-   
-
-  
-  
-  
-
-/*        // Si el vehículo no se encuentra, devolver un mensaje de error y un estado 404
-        if (!vehicle) {
-            res.status(404).json({ mensaje: 'Vehículo no encontrado' });
-            return;
-        }
-        // Buscar el dispositivo por su matrícula en la colección "devices" de la base de datos
-        const dispositivo = await db.collection('devices').findOne({ idDispositivo });
-        // Si el vehículo no se encuentra, devolver un mensaje de error y un estado 404
-        if (!dispositivo) {
-            res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
-            return;
-        }
-        // Comprobar si el dispositivo ya está en la lista de dispositivos del vehículo
-        if (vehiculo.idDispositivo) {
-            if (vehiculo.idDispositivo === dispositivo._id) {
-                res.status(409).json({ mensaje: 'El dispositivo ya está asociado al vehículo' });
-                // Actualizar el vehículo en la base de datos con la lista de dispositivos actualizada
-            } else {
-                await db.collection('vehicles').updateOne({ matricula }, { $set: { idDispositivo: dispositivo._id } });
-            }
-        } else {
-            // Si está vacío.
-            await db.collection('vehicles').updateOne({ matricula }, { $set: { idDispositivo: dispositivo._id } });
-        }
-        // Devolver el vehículo actualizado como respuesta
-        res.send(vehiculo);
-
-});
-*/
+// Export
 
 module.exports = router;

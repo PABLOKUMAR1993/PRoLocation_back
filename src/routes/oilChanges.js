@@ -6,7 +6,11 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
-//Método para crear un cambio de aceite
+
+// Métodos Rest.
+
+
+////// Método para crear un cambio de aceite.
 router.post("/createOilChange", (req, res) => {
     const db = req.app.locals.db;
     const oilChange = req.body;
@@ -25,6 +29,7 @@ router.post("/createOilChange", (req, res) => {
     });
 
 });
+
 
 // Export
 

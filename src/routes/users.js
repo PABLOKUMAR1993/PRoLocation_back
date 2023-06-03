@@ -1,17 +1,16 @@
 "use strict";
+
 // Importaciones
 
 const express = require("express");
 const router = express.Router();
-const axios = require("axios");
 require("dotenv").config();
 
 
-/**
- * Insertar vehículo en el array vehículos de un usuario
- */
+// Métodos Rest.
 
-// Metodo para agregar un vehículo a un usuario
+
+////// Método para agregar un vehículo a un usuario.
 router.post('/addVehicleToUser', async function(req, res) {
   // Obtener la instancia de la base de datos desde el objeto "req.app.locals"
   const db = req.app.locals.db;

@@ -6,7 +6,11 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
-//Método para crear un cambio de filtro de aire
+
+// Métodos Rest
+
+
+////// Método para crear un cambio de filtro de aire
 router.post("/createAirFilterChange", (req, res) => {
     const db = req.app.locals.db;
     const airFilterChange = req.body;
@@ -25,9 +29,6 @@ router.post("/createAirFilterChange", (req, res) => {
     });
 
 });
-
-
-
 
 
 // Export

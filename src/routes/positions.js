@@ -4,15 +4,14 @@
 
 const express = require("express");
 const router = express.Router();
-const axios = require("axios");
-const { verifyToken } = require("../middleware/jwt");
 const ObjectId = require('mongodb').ObjectId;
 require("dotenv").config();
 
 
-// Métodos Rest
+// Métodos Rest.
 
-//Método para crear un dispositivo
+
+////// Método para crear una posición.
 router.post("/createPosition", (req, res) => {
   const db = req.app.locals.db;
   const position = req.body;
@@ -32,7 +31,7 @@ router.post("/createPosition", (req, res) => {
 
 });
 
-//Asignar posicion al dispositivo
+////// Asignar posicion al dispositivo.
 router.post('/addPositionToDevice', async function (req, res) {
   // Obtener la instancia de la base de datos desde el objeto "req.app.locals"
   const db = req.app.locals.db;
@@ -61,7 +60,7 @@ router.post('/addPositionToDevice', async function (req, res) {
       return;
     }
     // Buscar el dispositivo por su id en la colección "devices" de la base de datos
-    const dispositivo = await db.collection('devices').findOne({ idDispositivo });
+    const dispositivo = await db.collection('devices').findOne({ _id: ObjectId(idDispositivo) });
     // Si el dispositivo no se encuentra, devolver un mensaje de error y un estado 404
     if (!dispositivo) {
       res.status(404).json({ mensaje: 'Dispositivo no encontrado' });
@@ -86,7 +85,7 @@ router.post('/addPositionToDevice', async function (req, res) {
 
     // Actualizar el dispositivo en la base de datos con la nueva posición
     const result = await db.collection('devices').updateOne(
-      { idDispositivo },
+      { _id: ObjectId( idDispositivo ) },
       { $push: { posiciones: posicion._id } }
     );
 

@@ -6,7 +6,11 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
-//Método para crear un cambio de filtro de polen
+
+// Métodos Rest.
+
+
+////// Método para crear un cambio de filtro de polen
 router.post("/createPollenFilterChange", (req, res) => {
     const db = req.app.locals.db;
     const pollenFilterChange = req.body;
@@ -25,9 +29,6 @@ router.post("/createPollenFilterChange", (req, res) => {
     });
 
 });
-
-
-
 
 
 // Export

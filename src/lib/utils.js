@@ -55,7 +55,7 @@ function findDeviceByIdObject(id) {
 }
 
 /**
- * Método que inserta posición la la base de datos .
+ * Método que inserta posición la base de datos.
  */
  function insertPosition(position) {
     return getDb().collection("positions").insertOne(position);

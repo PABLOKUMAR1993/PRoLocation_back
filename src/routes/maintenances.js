@@ -6,7 +6,11 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
-//Método para insertar un mantenimiento en el array correspondiente
+
+// Métodos Rest.
+
+
+////// Método para insertar un mantenimiento en el array correspondiente
 router.post("/createMaintenance", (req, res) => {
     const db = req.app.locals.db;
     const maintenance = req.body;
@@ -25,9 +29,6 @@ router.post("/createMaintenance", (req, res) => {
     });
 
 });
-
-
-
 
 
 // Export

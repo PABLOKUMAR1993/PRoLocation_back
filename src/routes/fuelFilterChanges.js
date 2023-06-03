@@ -6,7 +6,11 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
-//Método para crear un cambio de combustible
+
+// Métodos Rest.
+
+
+////// Método para crear un cambio de combustible
 router.post("/createFuelFilterChange", (req, res) => {
     const db = req.app.locals.db;
     const fuelFilterChange = req.body;
@@ -25,9 +29,6 @@ router.post("/createFuelFilterChange", (req, res) => {
     });
 
 });
-
-
-
 
 
 // Export

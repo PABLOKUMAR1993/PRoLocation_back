@@ -6,7 +6,11 @@ const express = require('express');
 const router = express.Router();
 require('dotenv').config();
 
-//Método para crear un cambio de filtro de aceite
+
+// Métodos Rest.
+
+
+////// Método para crear un cambio de filtro de aceite.
 router.post("/createOilFilterChange", (req, res) => {
     const db = req.app.locals.db;
     const oilFilterChange = req.body;
@@ -25,9 +29,6 @@ router.post("/createOilFilterChange", (req, res) => {
     });
 
 });
-
-
-
 
 
 // Export
