@@ -11,7 +11,8 @@
     "mongoose": "^7.0.5",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.1",
-    "raw-body": "^2.5.2"
+    "raw-body": "^2.5.2",
+    "ws": "^8.13.0"
   },
   "name": "pro_location",
   "version": "1.0.0",

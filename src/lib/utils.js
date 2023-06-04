@@ -4,6 +4,7 @@
 
 const { getDb } = require("./db");
 const { ObjectId } = require('mongodb');
+const axios = require('axios');
 require("dotenv").config();
 
 // Métodos
@@ -60,6 +61,10 @@ function findDeviceByIdObject(id) {
  function insertPosition(position) {
     return getDb().collection("positions").insertOne(position);
 }
+
+/**
+ * Método que recupera las coordenadas de un vehículo.
+ */
 
 
 // Exportaciones

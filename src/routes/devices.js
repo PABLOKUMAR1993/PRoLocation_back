@@ -85,15 +85,11 @@ router.get('/actualPositionVehicleById/:idVehiculo', verifyToken, async (req, re
 
         // Se busca el vehículo.
         const vehicle = await findVehicleById(req.params.idVehiculo);
-        if (!vehicle) {
-            return res.status(404).send({mensaje: "No se encontró el vehículo."});
-        }
+        if (!vehicle) return res.status(404).send({mensaje: "No se encontró el vehículo."});
 
         // Recupero el dispositivo físico asociado al vehículo.
         const device = await findPhisicalDeviceId(vehicle.idApi, dataApi);
-        if (!device) {
-            return res.status(404).send({mensaje: "No se encontró el dispositivo asociado al vehículo."});
-        }
+        if (!device) return res.status(404).send({mensaje: "No se encontró el dispositivo asociado al vehículo."});
 
         // Si el dispositivo no es null, creo un objeto posición y lo envío al front.
         const position = {
